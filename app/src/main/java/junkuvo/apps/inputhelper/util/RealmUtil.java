@@ -7,12 +7,13 @@ import junkuvo.apps.inputhelper.fragment.item.ListItemData;
 
 public class RealmUtil {
 
-    public static void insertHistoryItem(Realm realm, final ListItemData listItemData) {
+    public static void insertItem(Realm realm, final ListItemData listItemData) {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-//                realm.copyToRealm(listItemData);
-                copyToRealmObject(listItemData, realm.createObject(ListItemData.class, System.currentTimeMillis()));
+                // プライマリキーが一致するデータがすでに存在すれば、データを更新し、無ければ新しくオブジェクトを作成します。
+                realm.copyToRealmOrUpdate(listItemData);
+//                copyToRealmObject(listItemData, realm.createObject(ListItemData.class, System.currentTimeMillis()));
             }
         });
     }
@@ -59,7 +60,7 @@ public class RealmUtil {
         return realmResults;
     }
 
-    public static RealmResults<ListItemData> selectAllHistoryItemAsync(Realm realm, String key, Sort sort) {
+    public static RealmResults<ListItemData> selectAllItemAsync(Realm realm, String key, Sort sort) {
         RealmResults<ListItemData> realmResults = null;
         try {
             realmResults = realm.where(ListItemData.class).findAllAsync()
@@ -70,7 +71,7 @@ public class RealmUtil {
         return realmResults;
     }
 
-    public static RealmResults<ListItemData> selectHistoryItemById(Realm realm, long id) {
+    public static RealmResults<ListItemData> selectListItemById(Realm realm, long id) {
         RealmResults<ListItemData> realmResults = null;
         try {
             realmResults = realm.where(ListItemData.class).equalTo("id", id).findAll();
@@ -105,7 +106,7 @@ public class RealmUtil {
                 // This will create a new object in Realm or throw an exception if the
                 // object already exists (same primary key)
                 // realm.copyToRealm(obj);
-                RealmResults realmResults = RealmUtil.selectHistoryItemById(Realm.getDefaultInstance(), id);
+                RealmResults realmResults = RealmUtil.selectListItemById(Realm.getDefaultInstance(), id);
                 if (realmResults.size() == 1) {
 //                    ((ListItemData) realmResults.get(0)).setMemo(body);
 
@@ -140,7 +141,7 @@ public class RealmUtil {
     }
 
     public static void deleteHistoryItem(Realm realm, long id) {
-        final RealmResults<ListItemData> historyItemModels = selectHistoryItemById(realm, id);
+        final RealmResults<ListItemData> historyItemModels = selectListItemById(realm, id);
         // All changes to data must happen in a transaction
         realm.executeTransaction(new Realm.Transaction() {
             @Override

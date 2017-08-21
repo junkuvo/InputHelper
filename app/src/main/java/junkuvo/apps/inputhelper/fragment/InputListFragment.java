@@ -41,13 +41,13 @@ public class InputListFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inputListCreator = new InputListCreator((App) getActivity().getApplication());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_inputlist_list, container, false);
+        inputListCreator = new InputListCreator((App) getActivity().getApplication());
         inputListCreator.prepareInputListView(view, mListener);
         return view;
     }

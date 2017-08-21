@@ -8,11 +8,13 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import junkuvo.apps.inputhelper.App;
 import junkuvo.apps.inputhelper.InputListCreator;
 import junkuvo.apps.inputhelper.R;
 import junkuvo.apps.inputhelper.fragment.item.ListItemData;
+import junkuvo.apps.inputhelper.util.ClipboardUtil;
 
 /**
  *
@@ -42,7 +44,8 @@ public class OverlayInputListFragment extends DialogFragment {
         inputListCreator.prepareInputListView(view, new InputListFragment.OnListFragmentInteractionListener() {
             @Override
             public void onListFragmentInteraction(ListItemData item) {
-
+                ClipboardUtil.copy(getContext(), item.getDetails());
+                Toast.makeText(getContext(), "コピーしました！", Toast.LENGTH_SHORT).show();
             }
         });
         builder.setView(view);

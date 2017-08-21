@@ -11,11 +11,11 @@ public class AppRealmMigration implements RealmMigration {
         // DynamicRealm exposes an editable schema
         RealmSchema schema = realm.getSchema();
 
-        if (oldVersion == 0) {
-            schema.get("HistoryItemModel")
-                    .addField("memo", String.class);
-            oldVersion++;
-        }
+//        if (oldVersion == 0) {
+//            schema.get("ListItemData")
+//                    .addField("memo", String.class);
+//            oldVersion++;
+//        }
     }
 
     //http://stackoverflow.com/questions/36907001/open-realm-with-new-realmconfiguration

@@ -2,6 +2,7 @@ package junkuvo.apps.inputhelper;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -31,7 +32,17 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
             @Override
             public void onClick(View view) {
                 InputListCreator inputListCreator = new InputListCreator((App) getApplication());
-                inputListCreator.createInputItemEditDialog(InputListActivity.this).show();
+                inputListCreator.createInputItemEditDialog(InputListActivity.this, new InputListCreator.InputEditDialogEventListener() {
+                    @Override
+                    public void onPositiveButtonClick(DialogInterface dialogInterface, int id) {
+
+                    }
+
+                    @Override
+                    public void onNegativeButtonClick(DialogInterface dialogInterface, int id) {
+
+                    }
+                }).show();
 //                IntentUtil.startOverlayActivity(InputListActivity.this);
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
@@ -83,6 +94,5 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
 
     @Override
     public void onListFragmentInteraction(ListItemData item) {
-
     }
 }
