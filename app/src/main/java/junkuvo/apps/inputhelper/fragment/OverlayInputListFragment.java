@@ -1,6 +1,7 @@
 package junkuvo.apps.inputhelper.fragment;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -49,6 +50,14 @@ public class OverlayInputListFragment extends DialogFragment {
             }
         });
         builder.setView(view);
+        builder.setMessage("コピーしたいデータをタップしてください");
+        builder.setNegativeButton("閉じる", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                getActivity().finish();
+            }
+        });
+        builder.setCancelable(false);
         return builder.create();
     }
 

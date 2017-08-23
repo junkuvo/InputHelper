@@ -1,7 +1,6 @@
 package junkuvo.apps.inputhelper.fragment;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +37,7 @@ public class InputListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
         final ListItemViewHolder viewHolder = (ListItemViewHolder) holder;
         viewHolder.mItem = mListItemData.get(position);
         viewHolder.mIdView.setText(String.valueOf(mListItemData.get(position).getId()));
-        viewHolder.mContentView.setText(mListItemData.get(position).getTitle());
+        viewHolder.mContentView.setText(mListItemData.get(position).getDetails());
 
         viewHolder.mView.setOnClickListener(new View.OnClickListener() {
             @Override

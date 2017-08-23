@@ -1,10 +1,12 @@
 package junkuvo.apps.inputhelper;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 
 import java.util.List;
@@ -32,23 +34,31 @@ public class InputListCreator {
         }
     }
 
-    public AlertDialog createInputItemEditDialog(final Context context, @Nullable final InputEditDialogEventListener inputEditDialogEventListener) {
+    public AlertDialog createInputItemEditDialog(final Activity activity, @Nullable final InputEditDialogEventListener inputEditDialogEventListener) {
+
+        LayoutInflater layoutInflater = activity.getLayoutInflater();
+        final View view = layoutInflater.inflate(R.layout.dialog_save_data, null);
+
         // Use the Builder class for convenient dialog construction
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage("ダイアログ")
-                .setPositiveButton("はい", new DialogInterface.OnClickListener() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage("保存しておきたいデータを\n入力してください")
+                .setView(view)
+                .setPositiveButton("保存", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+
+                        String content = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
+
                         ListItemData listItemData = new ListItemData();
                         listItemData.setId(System.currentTimeMillis());
                         listItemData.setTitle("title");
-                        listItemData.setDetails("details");
+                        listItemData.setDetails(content);
                         listItemData.setCreateDateTime(String.valueOf(System.currentTimeMillis()));
                         RealmUtil.insertItem(realm, listItemData);
-//                        if(context instanceof OverlayActivity){
-//                            ((OverlayActivity) context).finish();
+//                        if(activity instanceof OverlayActivity){
+//                            ((OverlayActivity) activity).finish();
 //                        }
 
-                        if(inputEditDialogEventListener != null){
+                        if (inputEditDialogEventListener != null) {
                             inputEditDialogEventListener.onPositiveButtonClick(dialog, id);
                         }
                     }
@@ -56,10 +66,10 @@ public class InputListCreator {
                 .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 //                        // User cancelled the dialog
-//                        if(context instanceof OverlayActivity){
-//                            ((OverlayActivity) context).finish();
+//                        if(activity instanceof OverlayActivity){
+//                            ((OverlayActivity) activity).finish();
 //                        }
-                        if(inputEditDialogEventListener != null){
+                        if (inputEditDialogEventListener != null) {
                             inputEditDialogEventListener.onNegativeButtonClick(dialog, id);
                         }
                     }
