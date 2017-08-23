@@ -73,7 +73,8 @@ public class InputListCreator {
                             inputEditDialogEventListener.onNegativeButtonClick(dialog, id);
                         }
                     }
-                });
+                })
+                .setCancelable(false);
         return builder.create();
     }
 
