@@ -1,9 +1,6 @@
 package junkuvo.apps.inputhelper.fragment;
 
 import android.app.Dialog;
-import android.app.NotificationManager;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;

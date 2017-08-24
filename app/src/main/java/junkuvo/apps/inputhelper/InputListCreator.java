@@ -15,6 +15,7 @@ import io.realm.Realm;
 import junkuvo.apps.inputhelper.fragment.InputListFragment;
 import junkuvo.apps.inputhelper.fragment.InputListRecyclerViewAdapter;
 import junkuvo.apps.inputhelper.fragment.item.ListItemData;
+import junkuvo.apps.inputhelper.util.InputItemUtil;
 import junkuvo.apps.inputhelper.util.RealmUtil;
 
 public class InputListCreator {
@@ -47,16 +48,7 @@ public class InputListCreator {
                     public void onClick(DialogInterface dialog, int id) {
 
                         String content = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
-
-                        ListItemData listItemData = new ListItemData();
-                        listItemData.setId(System.currentTimeMillis());
-                        listItemData.setTitle("title");
-                        listItemData.setDetails(content);
-                        listItemData.setCreateDateTime(String.valueOf(System.currentTimeMillis()));
-                        RealmUtil.insertItem(realm, listItemData);
-//                        if(activity instanceof OverlayActivity){
-//                            ((OverlayActivity) activity).finish();
-//                        }
+                        InputItemUtil.save(realm, content);
 
                         if (inputEditDialogEventListener != null) {
                             inputEditDialogEventListener.onPositiveButtonClick(dialog, id);

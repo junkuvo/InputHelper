@@ -21,7 +21,6 @@ import junkuvo.apps.inputhelper.fragment.item.ListItemData;
 public class InputListFragment extends DialogFragment {
 
     private OnListFragmentInteractionListener mListener;
-    private InputListCreator inputListCreator;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -47,7 +46,7 @@ public class InputListFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_inputlist_list, container, false);
-        inputListCreator = new InputListCreator((App) getActivity().getApplication());
+        InputListCreator inputListCreator = new InputListCreator((App) getActivity().getApplication());
         inputListCreator.prepareInputListView(view, mListener);
         return view;
     }

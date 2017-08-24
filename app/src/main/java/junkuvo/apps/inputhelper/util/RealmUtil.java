@@ -1,6 +1,7 @@
 package junkuvo.apps.inputhelper.util;
 
 import io.realm.Realm;
+import io.realm.RealmObject;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import junkuvo.apps.inputhelper.fragment.item.ListItemData;
@@ -81,8 +82,7 @@ public class RealmUtil {
         return realmResults;
     }
 
-    // FIXME MEMOに依存している、こういうのDIで解決できる？
-    public static void updateHistoryMemo(Realm realm, final RealmResults realmResults, final String body) {
+    public static void updateInputItem(Realm realm, final RealmObject realmResults) {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -140,7 +140,7 @@ public class RealmUtil {
 //        to.setStepCountAlert(from.getStepCountAlert());
     }
 
-    public static void deleteHistoryItem(Realm realm, long id) {
+    public static void deleteInputItem(Realm realm, long id) {
         final RealmResults<ListItemData> historyItemModels = selectListItemById(realm, id);
         // All changes to data must happen in a transaction
         realm.executeTransaction(new Realm.Transaction() {

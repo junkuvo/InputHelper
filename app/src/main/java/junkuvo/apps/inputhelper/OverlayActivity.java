@@ -12,15 +12,13 @@ import junkuvo.apps.inputhelper.fragment.item.ListItemData;
 
 
 /**
- * アプリがバックグラウンドにいる場合（バックグラウンドでもKillされて、いない場合でも）に、
- * AzureのNotificationReceiverより呼び出されて、ダイアログFragmentだけを表示するActivity
- * ロック中でも表示される。
  */
-public class OverlayActivity extends FragmentActivity implements InputListFragment.OnListFragmentInteractionListener{
+public class OverlayActivity extends FragmentActivity implements InputListFragment.OnListFragmentInteractionListener {
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.activity_overlay);
         this.showDialog();
     }
 
@@ -31,8 +29,7 @@ public class OverlayActivity extends FragmentActivity implements InputListFragme
 
     private void showDialog() {
         final DialogFragment fragment = new OverlayInputListFragment();
-        fragment.setCancelable(true);
-
+        fragment.setCancelable(false);
         Bundle bundle = getIntent().getExtras();
         fragment.setArguments(bundle);
 
@@ -50,4 +47,5 @@ public class OverlayActivity extends FragmentActivity implements InputListFragme
     public void onListFragmentInteraction(ListItemData item) {
 
     }
+
 }

@@ -46,7 +46,7 @@ public class OverlayInputListFragment extends DialogFragment {
             @Override
             public void onListFragmentInteraction(ListItemData item) {
                 ClipboardUtil.copy(getContext(), item.getDetails());
-                Toast.makeText(getContext(), "コピーしました！", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), item.getDetails() + "\nコピーしました！", Toast.LENGTH_SHORT).show();
             }
         });
         builder.setView(view);
@@ -60,5 +60,4 @@ public class OverlayInputListFragment extends DialogFragment {
         builder.setCancelable(false);
         return builder.create();
     }
-
 }

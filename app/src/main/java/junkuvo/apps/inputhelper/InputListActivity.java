@@ -8,15 +8,22 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import io.realm.Realm;
 import junkuvo.apps.inputhelper.fragment.InputListFragment;
 import junkuvo.apps.inputhelper.fragment.item.ListItemData;
 import junkuvo.apps.inputhelper.service.NotificationService;
+import junkuvo.apps.inputhelper.util.InputItemUtil;
+import junkuvo.apps.inputhelper.util.RealmUtil;
 
 public class InputListActivity extends AppCompatActivity implements InputListFragment.OnListFragmentInteractionListener {
 
@@ -93,6 +100,33 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
     private NotificationService notificationService;
 
     @Override
-    public void onListFragmentInteraction(ListItemData item) {
+    public void onListFragmentInteraction(final ListItemData item) {
+        final Realm realm = ((App) getApplication()).getRealm();
+        LayoutInflater layoutInflater = getLayoutInflater();
+        final View view = layoutInflater.inflate(R.layout.dialog_save_data, null);
+        String content = item.getDetails();
+        ((AppCompatEditText) view.findViewById(R.id.et_content)).setText(content);
+
+        // Use the Builder class for convenient dialog construction
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("保存しておきたいデータを\n入力してください")
+                .setView(view)
+                .setPositiveButton("保存", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        String content = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
+                        InputItemUtil.update(realm, content);
+                        Snackbar.make(findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("キャンセル", null)
+                .setNeutralButton("削除", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        RealmUtil.deleteInputItem(realm, item.getId());
+                        Snackbar.make(findViewById(R.id.main), "削除しました！", Snackbar.LENGTH_SHORT).show();
+                    }
+                })
+                .setCancelable(false);
+        builder.show();
     }
 }

@@ -14,7 +14,6 @@ public class ListItemData extends RealmObject {
     @Required
     private String createDateTime;
 
-
     public ListItemData() {
     }
 
