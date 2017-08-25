@@ -12,6 +12,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -42,7 +43,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                 inputListCreator.createInputItemEditDialog(InputListActivity.this, new InputListCreator.InputEditDialogEventListener() {
                     @Override
                     public void onPositiveButtonClick(DialogInterface dialogInterface, int id) {
-
+                        ((RecyclerView)findViewById(R.id.list)).getAdapter().notifyDataSetChanged();
                     }
 
                     @Override
@@ -50,22 +51,17 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
 
                     }
                 }).show();
-//                IntentUtil.startOverlayActivity(InputListActivity.this);
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
             }
         });
 
         Intent intent = new Intent(this, NotificationService.class);
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-
-
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_input_list, menu);
+//        getMenuInflater().inflate(R.menu.menu_input_list, menu);
         return true;
     }
 
@@ -100,7 +96,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
     private NotificationService notificationService;
 
     @Override
-    public void onListFragmentInteraction(final ListItemData item) {
+    public void onListFragmentInteraction(final RecyclerView.Adapter adapter, final ListItemData item) {
         final Realm realm = ((App) getApplication()).getRealm();
         LayoutInflater layoutInflater = getLayoutInflater();
         final View view = layoutInflater.inflate(R.layout.dialog_save_data, null);
@@ -116,6 +112,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                         String content = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
                         InputItemUtil.update(realm, content);
                         Snackbar.make(findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
+                        adapter.notifyDataSetChanged();
                     }
                 })
                 .setNegativeButton("キャンセル", null)
@@ -124,9 +121,15 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                     public void onClick(DialogInterface dialogInterface, int i) {
                         RealmUtil.deleteInputItem(realm, item.getId());
                         Snackbar.make(findViewById(R.id.main), "削除しました！", Snackbar.LENGTH_SHORT).show();
+                        adapter.notifyDataSetChanged();
                     }
-                })
-                .setCancelable(false);
+                });
         builder.show();
+    }
+
+    @Override
+    public void onListEmpty() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        // TODO animation
     }
 }

@@ -3,6 +3,7 @@ package junkuvo.apps.inputhelper.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +19,7 @@ import junkuvo.apps.inputhelper.fragment.item.ListItemData;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class InputListFragment extends DialogFragment {
+public class InputListFragment extends DialogFragment{
 
     private OnListFragmentInteractionListener mListener;
 
@@ -45,7 +46,7 @@ public class InputListFragment extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_inputlist_list, container, false);
+        View view = inflater.inflate(R.layout.recyclerview_input_list, container, false);
         InputListCreator inputListCreator = new InputListCreator((App) getActivity().getApplication());
         inputListCreator.prepareInputListView(view, mListener);
         return view;
@@ -80,7 +81,8 @@ public class InputListFragment extends DialogFragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onListFragmentInteraction(ListItemData item);
+        void onListFragmentInteraction(RecyclerView.Adapter adapter, ListItemData item);
+
+        void onListEmpty();
     }
 }

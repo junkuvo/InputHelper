@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +33,10 @@ public class InputListCreator {
         if (view instanceof RecyclerView) {
             List<ListItemData> list = RealmUtil.selectAllItem(realm);
             RecyclerView recyclerView = (RecyclerView) view;
+
+            DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), new LinearLayoutManager(view.getContext()).getOrientation());
+            recyclerView.addItemDecoration(dividerItemDecoration);
+
             recyclerView.setAdapter(new InputListRecyclerViewAdapter(list, listener));
         }
     }
@@ -65,8 +71,7 @@ public class InputListCreator {
                             inputEditDialogEventListener.onNegativeButtonClick(dialog, id);
                         }
                     }
-                })
-                .setCancelable(false);
+                });
         return builder.create();
     }
 

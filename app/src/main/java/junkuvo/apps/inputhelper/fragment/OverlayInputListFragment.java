@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,10 +42,10 @@ public class OverlayInputListFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         ViewGroup container = getActivity().findViewById(R.id.ll_overlay);
-        View view = inflater.inflate(R.layout.fragment_inputlist_list, container, false);
+        View view = inflater.inflate(R.layout.recyclerview_input_list, container, false);
         inputListCreator.prepareInputListView(view, new InputListFragment.OnListFragmentInteractionListener() {
             @Override
-            public void onListFragmentInteraction(ListItemData item) {
+            public void onListFragmentInteraction(RecyclerView.Adapter adapter, ListItemData item) {
                 ClipboardUtil.copy(getContext(), item.getDetails());
                 Toast.makeText(getContext(), item.getDetails() + "\nコピーしました！", Toast.LENGTH_SHORT).show();
             }
@@ -57,7 +58,13 @@ public class OverlayInputListFragment extends DialogFragment {
                 getActivity().finish();
             }
         });
-        builder.setCancelable(false);
+        builder.setCancelable(true);
         return builder.create();
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        super.onCancel(dialog);
+        getActivity().finish();
     }
 }

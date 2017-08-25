@@ -66,11 +66,10 @@ public class NotificationService extends Service {
     private void startServiceForeground() {
         // サービスを永続化するために、通知を作成する
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
-        builder.setWhen(System.currentTimeMillis());
-        builder.setTicker("hahahah");
-        builder.setContentTitle(getString(R.string.app_name));
-        builder.setContentText("入力したい文字をコピー");
-        builder.setSubText("タップで入力値を選択してコピーできます");
+//        builder.setWhen(System.currentTimeMillis());
+        builder.setContentTitle("データをコピー");
+        builder.setContentText("タップでコピーしたいデータを選択できます");
+//        builder.setSubText("タップで入力値を選択してコピーできます");
         builder.setSmallIcon(R.mipmap.ic_launcher);
         // Large icon appears on the left of the notification
 //        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));

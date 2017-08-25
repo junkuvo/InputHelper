@@ -3,6 +3,7 @@ package junkuvo.apps.inputhelper;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.RecyclerView;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -29,7 +30,7 @@ public class OverlayActivity extends FragmentActivity implements InputListFragme
 
     private void showDialog() {
         final DialogFragment fragment = new OverlayInputListFragment();
-        fragment.setCancelable(false);
+        fragment.setCancelable(true);
         Bundle bundle = getIntent().getExtras();
         fragment.setArguments(bundle);
 
@@ -44,8 +45,12 @@ public class OverlayActivity extends FragmentActivity implements InputListFragme
     }
 
     @Override
-    public void onListFragmentInteraction(ListItemData item) {
+    public void onListFragmentInteraction(RecyclerView.Adapter adapter, ListItemData item) {
 
     }
 
+    @Override
+    public void onListEmpty() {
+
+    }
 }
