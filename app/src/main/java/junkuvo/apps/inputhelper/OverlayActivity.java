@@ -50,7 +50,7 @@ public class OverlayActivity extends FragmentActivity implements InputListFragme
     }
 
     @Override
-    public void onListEmpty() {
+    public void onListAdapterCreated(RecyclerView.Adapter adapter) {
 
     }
 }

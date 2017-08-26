@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -12,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 
 import junkuvo.apps.inputhelper.BuildConfig;
+import junkuvo.apps.inputhelper.InputListActivity;
 import junkuvo.apps.inputhelper.OverlayActivity;
 import junkuvo.apps.inputhelper.R;
 
@@ -72,7 +74,7 @@ public class NotificationService extends Service {
 //        builder.setSubText("タップで入力値を選択してコピーできます");
         builder.setSmallIcon(R.mipmap.ic_launcher);
         // Large icon appears on the left of the notification
-//        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
 
 ////        // FIXME : service から unbindする方法がないので、Notification から停止させる機能は一旦なくす
 //        builder.addAction(R.mipmap.ic_launcher, "a", PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(BROADCAST_KEY_CLICK), 0));
@@ -94,6 +96,11 @@ public class NotificationService extends Service {
         }
         // ロックスクリーン上でどう見えるか（見えなくていい）
         builder.setVisibility(Notification.VISIBILITY_SECRET);
+
+        Intent intentAction = new Intent(appContext, InputListActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(appContext, 1, intentAction, PendingIntent.FLAG_ONE_SHOT);
+        NotificationCompat.Action action = new NotificationCompat.Action.Builder(R.drawable.ic_playlist_add_white_48dp, "データの編集", pendingIntent).build();
+        builder.addAction(action);
 
         // サービス永続化
         startForeground(R.string.app_name, builder.build());

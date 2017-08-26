@@ -52,7 +52,6 @@ public class InputListFragment extends DialogFragment{
         return view;
     }
 
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -83,6 +82,6 @@ public class InputListFragment extends DialogFragment{
     public interface OnListFragmentInteractionListener {
         void onListFragmentInteraction(RecyclerView.Adapter adapter, ListItemData item);
 
-        void onListEmpty();
+        void onListAdapterCreated(RecyclerView.Adapter adapter);
     }
 }

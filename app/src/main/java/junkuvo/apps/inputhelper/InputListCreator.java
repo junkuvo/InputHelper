@@ -3,6 +3,7 @@ package junkuvo.apps.inputhelper;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.DividerItemDecoration;
@@ -11,8 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import java.util.List;
-
+import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
 import junkuvo.apps.inputhelper.fragment.InputListFragment;
 import junkuvo.apps.inputhelper.fragment.InputListRecyclerViewAdapter;
@@ -31,13 +31,13 @@ public class InputListCreator {
     public void prepareInputListView(View view, InputListFragment.OnListFragmentInteractionListener listener) {
         // Set the adapter
         if (view instanceof RecyclerView) {
-            List<ListItemData> list = RealmUtil.selectAllItem(realm);
+            OrderedRealmCollection<ListItemData> list = RealmUtil.selectAllItem(realm);
             RecyclerView recyclerView = (RecyclerView) view;
 
             DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), new LinearLayoutManager(view.getContext()).getOrientation());
             recyclerView.addItemDecoration(dividerItemDecoration);
 
-            recyclerView.setAdapter(new InputListRecyclerViewAdapter(list, listener));
+            recyclerView.setAdapter(new InputListRecyclerViewAdapter(view.getContext(), list, true, listener));
         }
     }
 
@@ -55,6 +55,7 @@ public class InputListCreator {
 
                         String content = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
                         InputItemUtil.save(realm, content);
+                        Snackbar.make(activity.findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
 
                         if (inputEditDialogEventListener != null) {
                             inputEditDialogEventListener.onPositiveButtonClick(dialog, id);
@@ -75,7 +76,7 @@ public class InputListCreator {
         return builder.create();
     }
 
-    interface InputEditDialogEventListener{
+    interface InputEditDialogEventListener {
         void onPositiveButtonClick(DialogInterface dialogInterface, int id);
 
         void onNegativeButtonClick(DialogInterface dialogInterface, int id);

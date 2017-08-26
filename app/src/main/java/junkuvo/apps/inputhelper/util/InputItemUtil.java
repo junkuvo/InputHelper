@@ -13,9 +13,9 @@ public class InputItemUtil {
         RealmUtil.insertItem(realm, listItemData);
     }
 
-    public static void update(Realm realm, String content){
+    public static void update(Realm realm, String content, long id){
         ListItemData listItemData = new ListItemData();
-        listItemData.setId(System.currentTimeMillis());
+        listItemData.setId(id);
         listItemData.setTitle("title");
         listItemData.setDetails(content);
         listItemData.setCreateDateTime(String.valueOf(System.currentTimeMillis()));

@@ -49,6 +49,11 @@ public class OverlayInputListFragment extends DialogFragment {
                 ClipboardUtil.copy(getContext(), item.getDetails());
                 Toast.makeText(getContext(), item.getDetails() + "\nコピーしました！", Toast.LENGTH_SHORT).show();
             }
+
+            @Override
+            public void onListAdapterCreated(RecyclerView.Adapter adapter) {
+
+            }
         });
         builder.setView(view);
         builder.setMessage("コピーしたいデータをタップしてください");

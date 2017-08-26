@@ -14,19 +14,27 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
+import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
 import junkuvo.apps.inputhelper.fragment.InputListFragment;
+import junkuvo.apps.inputhelper.fragment.InputListRecyclerViewAdapter;
 import junkuvo.apps.inputhelper.fragment.item.ListItemData;
 import junkuvo.apps.inputhelper.service.NotificationService;
 import junkuvo.apps.inputhelper.util.InputItemUtil;
 import junkuvo.apps.inputhelper.util.RealmUtil;
 
 public class InputListActivity extends AppCompatActivity implements InputListFragment.OnListFragmentInteractionListener {
+
+    FloatingActionButton fab;
+    InputListRecyclerViewAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +43,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -43,7 +51,13 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                 inputListCreator.createInputItemEditDialog(InputListActivity.this, new InputListCreator.InputEditDialogEventListener() {
                     @Override
                     public void onPositiveButtonClick(DialogInterface dialogInterface, int id) {
-                        ((RecyclerView)findViewById(R.id.list)).getAdapter().notifyDataSetChanged();
+                        if(adapter.isEmpty()){
+                            OrderedRealmCollection<ListItemData> list = RealmUtil.selectAllItem(((App)getApplication()).getRealm());
+                            if((list != null) && list.size() > 0){
+                                adapter.setRealmReferenceToAdapter(list);
+                                fab.clearAnimation();
+                            }
+                        }
                     }
 
                     @Override
@@ -56,6 +70,19 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
 
         Intent intent = new Intent(this, NotificationService.class);
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(adapter.isEmpty()) {
+            startAnimationFab();
+        }
+    }
+
+    private void startAnimationFab(){
+        Animation blinkAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blink);
+        fab.startAnimation(blinkAnimation);
     }
 
     @Override
@@ -110,9 +137,8 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                 .setPositiveButton("保存", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         String content = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
-                        InputItemUtil.update(realm, content);
+                        InputItemUtil.update(realm, content, item.getId());
                         Snackbar.make(findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
-                        adapter.notifyDataSetChanged();
                     }
                 })
                 .setNegativeButton("キャンセル", null)
@@ -121,15 +147,41 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                     public void onClick(DialogInterface dialogInterface, int i) {
                         RealmUtil.deleteInputItem(realm, item.getId());
                         Snackbar.make(findViewById(R.id.main), "削除しました！", Snackbar.LENGTH_SHORT).show();
-                        adapter.notifyDataSetChanged();
+                        if(adapter.getItemCount() == 0){
+                            ((InputListRecyclerViewAdapter)adapter).setEmptyLayout();
+                            startAnimationFab();
+                        }
                     }
                 });
         builder.show();
     }
 
     @Override
-    public void onListEmpty() {
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        // TODO animation
+    public void onListAdapterCreated(RecyclerView.Adapter adapter) {
+        this.adapter = (InputListRecyclerViewAdapter) adapter;
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if(KeyEvent.ACTION_DOWN == event.getAction()){
+            if(event.getKeyCode() == KeyEvent.KEYCODE_BACK){
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("アプリを終了しますか？\n通知バーからのコピーができなくなります");
+                builder.setPositiveButton("終了", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        finish();
+                    }
+                });
+                builder.setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                    }
+                });
+                builder.show();
+            }
+
+        }
+        return super.dispatchKeyEvent(event);
     }
 }
