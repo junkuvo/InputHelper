@@ -72,7 +72,7 @@ public class NotificationService extends Service {
         builder.setContentTitle("データをコピー");
         builder.setContentText("タップでコピーしたいデータを選択できます");
 //        builder.setSubText("タップで入力値を選択してコピーできます");
-        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setSmallIcon(R.drawable.ic_stat_notification);
         // Large icon appears on the left of the notification
         builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
 
