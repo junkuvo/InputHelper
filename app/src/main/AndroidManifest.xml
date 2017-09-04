@@ -2,9 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="junkuvo.apps.inputhelper">
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
-        android:allowBackup="true"
         android:name=".App"
+        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -21,19 +24,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.TranslucentBackground"
+            android:name=".OverlayActivity"
             android:launchMode="singleInstance"
-            android:name=".OverlayActivity"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.TranslucentBackground" />
 
         <service android:name=".service.NotificationService" />
 
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="e96c27ec5a15ec99185fe13f2dfe59a3ce18a8c8" />
+
+        <receiver android:name=".receiver.BootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
     </application>
 
-    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

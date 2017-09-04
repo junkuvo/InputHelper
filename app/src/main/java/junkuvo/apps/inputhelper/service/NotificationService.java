@@ -6,7 +6,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -19,19 +18,7 @@ import junkuvo.apps.inputhelper.R;
 
 public class NotificationService extends Service {
 
-    //サービスに接続するためのBinder
-    public class ServiceLocalBinder extends Binder {
-        //サービスの取得
-        public NotificationService getService() {
-            return NotificationService.this;
-        }
-    }
-
-    //Binderの生成
-    private final IBinder binder = new ServiceLocalBinder();
-
     private Context appContext;
-//    private IntentFilter localBroadcastFilter = new IntentFilter();
 
     @Override
     public void onCreate() {
@@ -40,31 +27,24 @@ public class NotificationService extends Service {
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        startServiceForeground();
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
-//        if (localBroadcastReceiver != null) {
-//            LocalBroadcastManager.getInstance(appContext).unregisterReceiver(localBroadcastReceiver);
-//            localBroadcastReceiver = null;
-//            appContext = null;
-//        }
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        startServiceForeground();
-//        localBroadcastFilter.addAction(BROADCAST_KEY_CLICK);
-//        LocalBroadcastManager.getInstance(appContext).registerReceiver(localBroadcastReceiver, localBroadcastFilter);
-//        registerReceiver(localBroadcastReceiver, localBroadcastFilter);
-        return binder;
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        return super.onUnbind(intent);
+        return null;
     }
 
     private static final String CHANNEL_ID = BuildConfig.APPLICATION_ID + "CHANNEL_ID";
+
     private void startServiceForeground() {
         // サービスを永続化するために、通知を作成する
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
@@ -106,18 +86,4 @@ public class NotificationService extends Service {
         startForeground(R.string.app_name, builder.build());
 
     }
-
-//    private final static String BROADCAST_KEY_CLICK = "BROADCAST_KEY_CLICK";
-//    private BroadcastReceiver localBroadcastReceiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            if (intent.getAction().equals(BROADCAST_KEY_CLICK)) {
-//                showEditDialog(context);
-//            }
-//        }
-//    };
-//
-//    private void showEditDialog(Context context){
-//        IntentUtil.startOverlayActivity(context);
-//    }
 }

@@ -1,5 +1,6 @@
 package junkuvo.apps.inputhelper.fragment.item;
 
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -10,6 +11,7 @@ public class ListItemViewHolder extends RecyclerView.ViewHolder {
 
     public final View mView;
     public final AppCompatTextView mContentView;
+    public final AppCompatImageView ivCopy;
     public ListItemData mItem;
 
     public ListItemViewHolder(View itemView) {
@@ -17,7 +19,7 @@ public class ListItemViewHolder extends RecyclerView.ViewHolder {
 
         mView = itemView;
         mContentView = (AppCompatTextView) itemView.findViewById(R.id.title);
-
+        ivCopy = itemView.findViewById(R.id.ivCopy);
     }
 
     @Override

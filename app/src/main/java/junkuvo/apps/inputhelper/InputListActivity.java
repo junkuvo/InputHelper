@@ -1,12 +1,8 @@
 package junkuvo.apps.inputhelper;
 
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -30,6 +26,7 @@ import junkuvo.apps.inputhelper.fragment.item.ListItemData;
 import junkuvo.apps.inputhelper.service.NotificationService;
 import junkuvo.apps.inputhelper.util.InputItemUtil;
 import junkuvo.apps.inputhelper.util.RealmUtil;
+import junkuvo.apps.inputhelper.util.SharedPreferencesUtil;
 
 public class InputListActivity extends AppCompatActivity implements InputListFragment.OnListFragmentInteractionListener {
 
@@ -51,9 +48,9 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                 inputListCreator.createInputItemEditDialog(InputListActivity.this, new InputListCreator.InputEditDialogEventListener() {
                     @Override
                     public void onPositiveButtonClick(DialogInterface dialogInterface, int id) {
-                        if(adapter.isEmpty()){
-                            OrderedRealmCollection<ListItemData> list = RealmUtil.selectAllItem(((App)getApplication()).getRealm());
-                            if((list != null) && list.size() > 0){
+                        if (adapter.isEmpty()) {
+                            OrderedRealmCollection<ListItemData> list = RealmUtil.selectAllItem(((App) getApplication()).getRealm());
+                            if ((list != null) && list.size() > 0) {
                                 adapter.setRealmReferenceToAdapter(list);
                                 fab.clearAnimation();
                             }
@@ -69,18 +66,18 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         });
 
         Intent intent = new Intent(this, NotificationService.class);
-        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        startService(intent);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if(adapter.isEmpty()) {
+        if (adapter.isEmpty()) {
             startAnimationFab();
         }
     }
 
-    private void startAnimationFab(){
+    private void startAnimationFab() {
         Animation blinkAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blink);
         fab.startAnimation(blinkAnimation);
     }
@@ -88,39 +85,32 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_input_list, menu);
+        getMenuInflater().inflate(R.menu.menu_input_list, menu);
         return true;
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem menuItem = menu.getItem(0);
+        boolean isChecked = SharedPreferencesUtil.getBoolean(this, getString(R.string.app_name), SharedPreferencesUtil.PrefKeys.NOTIFICATION_SHOW_IN_BAR.getKey(), false);
+        menuItem.setChecked(isChecked);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            // チェックボックスの状態変更を行う
+            item.setChecked(!item.isChecked());
+            SharedPreferencesUtil.saveBoolean(this, getString(R.string.app_name),SharedPreferencesUtil.PrefKeys.NOTIFICATION_SHOW_IN_BAR.getKey() ,item.isChecked());
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
-
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            notificationService = ((NotificationService.ServiceLocalBinder) iBinder).getService();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            notificationService = null;
-        }
-    };
-
-    @SuppressWarnings("unused")
-    private NotificationService notificationService;
 
     @Override
     public void onListFragmentInteraction(final RecyclerView.Adapter adapter, final ListItemData item) {
@@ -147,8 +137,8 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                     public void onClick(DialogInterface dialogInterface, int i) {
                         RealmUtil.deleteInputItem(realm, item.getId());
                         Snackbar.make(findViewById(R.id.main), "削除しました！", Snackbar.LENGTH_SHORT).show();
-                        if(adapter.getItemCount() == 0){
-                            ((InputListRecyclerViewAdapter)adapter).setEmptyLayout();
+                        if (adapter.getItemCount() == 0) {
+                            ((InputListRecyclerViewAdapter) adapter).setEmptyLayout();
                             startAnimationFab();
                         }
                     }
@@ -163,25 +153,25 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if(KeyEvent.ACTION_DOWN == event.getAction()){
-            if(event.getKeyCode() == KeyEvent.KEYCODE_BACK){
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage("アプリを終了しますか？\n通知バーからのコピーができなくなります");
-                builder.setPositiveButton("終了", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        finish();
-                    }
-                });
-                builder.setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                    }
-                });
-                builder.show();
-            }
-
-        }
+//        if(KeyEvent.ACTION_DOWN == event.getAction()){
+//            if(event.getKeyCode() == KeyEvent.KEYCODE_BACK){
+//                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//                builder.setMessage("アプリを終了しますか？\n通知バーからのコピーができなくなります");
+//                builder.setPositiveButton("終了", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i) {
+//                        finish();
+//                    }
+//                });
+//                builder.setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i) {
+//                    }
+//                });
+//                builder.show();
+//            }
+//
+//        }
         return super.dispatchKeyEvent(event);
     }
 }

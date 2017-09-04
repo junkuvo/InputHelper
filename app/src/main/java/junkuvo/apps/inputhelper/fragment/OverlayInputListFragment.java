@@ -54,7 +54,7 @@ public class OverlayInputListFragment extends DialogFragment {
             public void onListAdapterCreated(RecyclerView.Adapter adapter) {
 
             }
-        });
+        }, true);
         builder.setView(view);
         builder.setMessage("コピーしたいデータをタップしてください");
         builder.setNegativeButton("閉じる", new DialogInterface.OnClickListener() {

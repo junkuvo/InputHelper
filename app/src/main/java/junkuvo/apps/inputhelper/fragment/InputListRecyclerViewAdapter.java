@@ -26,7 +26,7 @@ import junkuvo.apps.inputhelper.fragment.item.ListItemViewHolder;
 public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListItemData, ListItemViewHolder> {
 
     private OrderedRealmCollection<ListItemData> mListItemData;
-    private final OnListFragmentInteractionListener mListener;
+    private OnListFragmentInteractionListener mListener;
     private boolean isEmpty = true;
 
     public boolean isEmpty() {
@@ -55,6 +55,18 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
 
     public InputListRecyclerViewAdapter(@NonNull Context context, @Nullable OrderedRealmCollection<ListItemData> items, boolean autoUpdate, OnListFragmentInteractionListener listener) {
         super(context, items, autoUpdate);
+        commonConstructor(items, listener);
+    }
+
+    private boolean fromNotification = false;
+
+    public InputListRecyclerViewAdapter(@NonNull Context context, @Nullable OrderedRealmCollection<ListItemData> items, boolean autoUpdate, OnListFragmentInteractionListener listener, boolean fromNotification) {
+        super(context, items, autoUpdate);
+        commonConstructor(items, listener);
+        this.fromNotification = fromNotification;
+    }
+
+    private void commonConstructor(@Nullable OrderedRealmCollection<ListItemData> items, OnListFragmentInteractionListener listener){
         mListener = listener;
         mListItemData = items;
 
@@ -102,6 +114,12 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
                     }
                 }
             });
+        }
+
+        if(fromNotification){
+            viewHolder.ivCopy.setVisibility(View.VISIBLE);
+        }else{
+            viewHolder.ivCopy.setVisibility(View.GONE);
         }
     }
 

@@ -28,7 +28,11 @@ public class InputListCreator {
         realm = app.getRealm();
     }
 
-    public void prepareInputListView(View view, InputListFragment.OnListFragmentInteractionListener listener) {
+    public void prepareInputListView(View view, InputListFragment.OnListFragmentInteractionListener listener){
+        prepareInputListView(view, listener, false);
+    }
+
+    public void prepareInputListView(View view, InputListFragment.OnListFragmentInteractionListener listener, boolean fromNotification) {
         // Set the adapter
         if (view instanceof RecyclerView) {
             OrderedRealmCollection<ListItemData> list = RealmUtil.selectAllItem(realm);
@@ -37,7 +41,7 @@ public class InputListCreator {
             DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), new LinearLayoutManager(view.getContext()).getOrientation());
             recyclerView.addItemDecoration(dividerItemDecoration);
 
-            recyclerView.setAdapter(new InputListRecyclerViewAdapter(view.getContext(), list, true, listener));
+            recyclerView.setAdapter(new InputListRecyclerViewAdapter(view.getContext(), list, true, listener, fromNotification));
         }
     }
 
