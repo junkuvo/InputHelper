@@ -11,6 +11,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 
 import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
@@ -52,7 +53,7 @@ public class InputListCreator {
 
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setMessage("保存しておきたいデータを\n入力してください")
+        builder.setMessage("保存しておきたいメモを\n入力してください")
                 .setView(view)
                 .setPositiveButton("保存", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -77,7 +78,17 @@ public class InputListCreator {
                         }
                     }
                 });
-        return builder.create();
+
+        final AlertDialog dialog = builder.create();
+        view.findViewById(R.id.et_content).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus && dialog.getWindow() != null) {
+                    dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                }
+            }
+        });
+        return dialog;
     }
 
     interface InputEditDialogEventListener {

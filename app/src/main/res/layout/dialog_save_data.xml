@@ -9,8 +9,8 @@
         android:id="@+id/et_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:hint="メールアドレス,住所など"
+        android:gravity="left"
+        android:hint="メールアドレス,住所や\n買い物リストなどをメモしましょう！"
         android:maxLines="8"
         tools:text="aaaああああああ"
         />

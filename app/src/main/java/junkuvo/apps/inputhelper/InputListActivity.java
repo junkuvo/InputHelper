@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
@@ -44,24 +45,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                InputListCreator inputListCreator = new InputListCreator((App) getApplication());
-                inputListCreator.createInputItemEditDialog(InputListActivity.this, new InputListCreator.InputEditDialogEventListener() {
-                    @Override
-                    public void onPositiveButtonClick(DialogInterface dialogInterface, int id) {
-                        if (adapter.isEmpty()) {
-                            OrderedRealmCollection<ListItemData> list = RealmUtil.selectAllItem(((App) getApplication()).getRealm());
-                            if ((list != null) && list.size() > 0) {
-                                adapter.setRealmReferenceToAdapter(list);
-                                fab.clearAnimation();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onNegativeButtonClick(DialogInterface dialogInterface, int id) {
-
-                    }
-                }).show();
+                showInputDialog();
             }
         });
 
@@ -69,11 +53,39 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         startService(intent);
     }
 
+    private void showInputDialog(){
+        InputListCreator inputListCreator = new InputListCreator((App) getApplication());
+        inputListCreator.createInputItemEditDialog(InputListActivity.this, new InputListCreator.InputEditDialogEventListener() {
+            @Override
+            public void onPositiveButtonClick(DialogInterface dialogInterface, int id) {
+                if (adapter.isEmpty()) {
+                    OrderedRealmCollection<ListItemData> list = RealmUtil.selectAllItem(((App) getApplication()).getRealm());
+                    if ((list != null) && list.size() > 0) {
+                        adapter.setRealmReferenceToAdapter(list);
+                        fab.clearAnimation();
+                    }
+                }
+            }
+
+            @Override
+            public void onNegativeButtonClick(DialogInterface dialogInterface, int id) {
+
+            }
+        }).show();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         if (adapter.isEmpty()) {
             startAnimationFab();
+        }
+
+        if (getIntent().hasExtra("FROM_OVERLAY")) {
+            if (getIntent().getBooleanExtra("FROM_OVERLAY", false)) {
+                showInputDialog();
+                getIntent().removeExtra("FROM_OVERLAY");
+            }
         }
     }
 
@@ -105,7 +117,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         if (id == R.id.action_settings) {
             // チェックボックスの状態変更を行う
             item.setChecked(!item.isChecked());
-            SharedPreferencesUtil.saveBoolean(this, getString(R.string.app_name),SharedPreferencesUtil.PrefKeys.NOTIFICATION_SHOW_IN_BAR.getKey() ,item.isChecked());
+            SharedPreferencesUtil.saveBoolean(this, getString(R.string.app_name), SharedPreferencesUtil.PrefKeys.NOTIFICATION_SHOW_IN_BAR.getKey(), item.isChecked());
             return true;
         }
 
@@ -122,7 +134,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
 
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("保存しておきたいデータを\n入力してください")
+        builder.setMessage("保存しておきたいメモを\n入力してください")
                 .setView(view)
                 .setPositiveButton("保存", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -143,7 +155,16 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                         }
                     }
                 });
-        builder.show();
+        final AlertDialog dialog = builder.create();
+        view.findViewById(R.id.et_content).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus && dialog.getWindow() != null) {
+                    dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                }
+            }
+        });
+        dialog.show();
     }
 
     @Override

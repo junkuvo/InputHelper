@@ -2,6 +2,7 @@ package junkuvo.apps.inputhelper.fragment;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import junkuvo.apps.inputhelper.App;
+import junkuvo.apps.inputhelper.InputListActivity;
 import junkuvo.apps.inputhelper.InputListCreator;
 import junkuvo.apps.inputhelper.R;
 import junkuvo.apps.inputhelper.fragment.item.ListItemData;
@@ -56,7 +58,16 @@ public class OverlayInputListFragment extends DialogFragment {
             }
         }, true);
         builder.setView(view);
-        builder.setMessage("コピーしたいデータをタップしてください");
+        builder.setMessage("コピーしたいメモを\nタップしてください");
+        builder.setPositiveButton("新しくメモする", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(getContext(), InputListActivity.class);
+                intent.putExtra("FROM_OVERLAY", true);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        });
         builder.setNegativeButton("閉じる", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {

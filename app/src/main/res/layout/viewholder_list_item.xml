@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -8,8 +8,11 @@
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/title"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
+        android:maxLines="3"
+        android:ellipsize="end"
         android:layout_margin="@dimen/text_margin"
         android:textAppearance="?attr/textAppearanceListItem"
         tools:text="1234567890\nqwertyui"/>
@@ -19,7 +22,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
+        android:layout_gravity="center_vertical"
         android:src="@drawable/ic_content_copy_grey_500_24dp"/>
-</RelativeLayout>
+</LinearLayout>

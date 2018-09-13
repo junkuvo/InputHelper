@@ -47,7 +47,7 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
 
     public void setEmptyLayout() {
         ListItemData itemData = new ListItemData();
-        itemData.setDetails("右下のボタンから\nよく使うデータを登録しておきましょう♪");
+        itemData.setDetails("右下のボタンから\nよく使うデータや忘れたくないことをメモしておきましょう♪");
         mListItemData = new RealmList<>();
         mListItemData.add(itemData);
         isEmpty = true;
@@ -64,6 +64,7 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
         super(context, items, autoUpdate);
         commonConstructor(items, listener);
         this.fromNotification = fromNotification;
+        setHasStableIds(true);
     }
 
     private void commonConstructor(@Nullable OrderedRealmCollection<ListItemData> items, OnListFragmentInteractionListener listener){
@@ -80,14 +81,15 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
         mListener.onListAdapterCreated(this);
     }
 
+    @NonNull
     @Override
-    public ListItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ListItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_list_item, parent, false);
         return new ListItemViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ListItemViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ListItemViewHolder holder, int position) {
         final ListItemViewHolder viewHolder = (ListItemViewHolder) holder;
         viewHolder.mItem = mListItemData.get(position);
         viewHolder.mContentView.setText(mListItemData.get(position).getDetails());
@@ -128,4 +130,8 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
         return mListItemData.size();
     }
 
+    @Override
+    public long getItemId(int index) {
+        return mListItemData.get(index).getId();
+    }
 }

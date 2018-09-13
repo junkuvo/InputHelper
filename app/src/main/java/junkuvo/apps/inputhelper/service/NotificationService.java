@@ -1,40 +1,51 @@
 package junkuvo.apps.inputhelper.service;
 
-import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.os.Build;
+import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 
-import junkuvo.apps.inputhelper.BuildConfig;
-import junkuvo.apps.inputhelper.InputListActivity;
+import com.squareup.seismic.ShakeDetector;
+
 import junkuvo.apps.inputhelper.OverlayActivity;
 import junkuvo.apps.inputhelper.R;
 
-public class NotificationService extends Service {
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
-    private Context appContext;
+public class NotificationService extends Service implements ShakeDetector.Listener{
+
 
     @Override
     public void onCreate() {
         super.onCreate();
-        appContext = getApplicationContext();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         startServiceForeground();
+
+        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        ShakeDetector shakeDetector = new ShakeDetector(this);
+        shakeDetector.start(sensorManager);
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        stopOverlayPlayerService();
+    }
+
+    private void stopOverlayPlayerService() {
+        stopSelf();
     }
 
     @Nullable
@@ -43,47 +54,69 @@ public class NotificationService extends Service {
         return null;
     }
 
-    private static final String CHANNEL_ID = BuildConfig.APPLICATION_ID + "CHANNEL_ID";
+    public static final String channelId = "InputHelper_channel_id";
+    public static final CharSequence channelName = "タップしてコピー";
+    NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId);
+    private NotificationManager notificationManager;
+    private static final int REQUEST_CODE_NOTIFICATION = 99;
 
-    private void startServiceForeground() {
-        // サービスを永続化するために、通知を作成する
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
-//        builder.setWhen(System.currentTimeMillis());
-        builder.setContentTitle("データをコピー");
-        builder.setContentText("タップでコピーしたいデータを選択できます");
-//        builder.setSubText("タップで入力値を選択してコピーできます");
-        builder.setSmallIcon(R.drawable.ic_stat_notification);
-        // Large icon appears on the left of the notification
-        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+    /**
+     * サービスを永続化するために、通知を作成する。これないと、タスクと一緒にOverlayもkillされる
+     *
+     * @see <a href=https://qiita.com/sakebook/items/8cafc0766b4f8dc95994>NotificationのStyleについて</a>
+     */
+    public void startServiceForeground() {
 
-////        // FIXME : service から unbindする方法がないので、Notification から停止させる機能は一旦なくす
-//        builder.addAction(R.mipmap.ic_launcher, "a", PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(BROADCAST_KEY_CLICK), 0));
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            // LOWじゃないと振動する。DEFAULTでは振動するが、上からポップアップはでない。
+            NotificationChannel notificationChannel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW);
+            notificationChannel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+            notificationChannel.enableVibration(false);// doesn't work
 
-        //通知タップ時のPendingIntent
-//        builder.setContentIntent(PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(BROADCAST_KEY_CLICK), 0));
-//        builder.setDeleteIntent(  //通知の削除時のPendingIntent
-//                getPendingIntentWithBroadcast(DELETE_NOTIFICATION)
-//        );
-
-        Intent intent = new Intent(appContext, OverlayActivity.class);
-        builder.setContentIntent(PendingIntent.getActivity(appContext, 0,intent, 0));
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            NotificationCompat.BigTextStyle notificationBigTextStyle = new NotificationCompat.BigTextStyle(builder);
-            builder.setStyle(notificationBigTextStyle);
-            // PRIORITY_MINだとどこにも表示されなくなる
-            builder.setPriority(Notification.PRIORITY_MIN);
+            getNotificationManager().createNotificationChannel(notificationChannel);
+            notificationBuilder.setChannelId(channelId);// コンストラクタで入れてるからいらないかも
         }
-        // ロックスクリーン上でどう見えるか（見えなくていい）
-        builder.setVisibility(Notification.VISIBILITY_SECRET);
 
-        Intent intentAction = new Intent(appContext, InputListActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(appContext, 1, intentAction, PendingIntent.FLAG_ONE_SHOT);
-        NotificationCompat.Action action = new NotificationCompat.Action.Builder(R.drawable.ic_playlist_add_white_48dp, "データの編集", pendingIntent).build();
-        builder.addAction(action);
+        Intent intent = new Intent(this, OverlayActivity.class);
+        notificationBuilder.setContentIntent(PendingIntent.getActivity(this, REQUEST_CODE_NOTIFICATION, intent, FLAG_UPDATE_CURRENT));
 
-        // サービス永続化
-        startForeground(R.string.app_name, builder.build());
+        notificationBuilder.setTicker(getString(R.string.app_name));
+        notificationBuilder.setContentTitle("メモをコピーする");
+        notificationBuilder.setContentText("タップでコピーしたいメモを選択できます");
+        notificationBuilder.setSmallIcon(R.drawable.ic_stat_notification);
+        notificationBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
 
+        notificationBuilder.setColor(ContextCompat.getColor(this, R.color.colorPrimary));
+//        notificationBuilder.setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
+//                .setShowActionsInCompactView(0, 1, 2));// Notificationを小さい表示にした時にも表示させたいアクションを定義
+
+//        notificationBuilder.mActions.clear();
+//        for (int i = 0; i < NotificationBroadcastAction.values().length; i++) {
+//            NotificationBroadcastAction action = NotificationBroadcastAction.values()[i]; // ordinal順に取得される
+//            if (action.isEnable()) {
+//                notificationBuilder.addAction(action.getIconResId(), getString(action.getStringResId()),
+//                        PendingIntent.getBroadcast(this, REQUEST_CODE_NOTIFICATION, new Intent(action.name()), FLAG_UPDATE_CURRENT));
+//            }
+//        }
+
+        // ロックスクリーン上でどう見えるか
+        notificationBuilder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
+        // PRIORITY_MINだとどこにも表示されなくなる
+        notificationBuilder.setPriority(NotificationCompat.PRIORITY_MIN);
+
+        startForeground(R.string.app_name, notificationBuilder.build());
+    }
+
+    private NotificationManager getNotificationManager() {
+        if (notificationManager == null) {
+            notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+        return notificationManager;
+    }
+
+    @Override
+    public void hearShake() {
+        Intent intent = new Intent(this, OverlayActivity.class);
+        startActivity(intent);
     }
 }

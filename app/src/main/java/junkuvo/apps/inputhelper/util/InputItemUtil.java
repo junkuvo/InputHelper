@@ -1,5 +1,9 @@
 package junkuvo.apps.inputhelper.util;
 
+import android.content.Context;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+
 import io.realm.Realm;
 import junkuvo.apps.inputhelper.fragment.item.ListItemData;
 
@@ -22,4 +26,13 @@ public class InputItemUtil {
         RealmUtil.updateInputItem(realm, listItemData);
     }
 
+    public static boolean showSoftInput(Context context, View view) {
+        InputMethodManager imm =
+                (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        if (null == imm) {
+            return false;
+        }
+        return imm.showSoftInput(view, 0);
+    }
 }
