@@ -53,7 +53,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         startService(intent);
     }
 
-    private void showInputDialog(){
+    private void showInputDialog() {
         InputListCreator inputListCreator = new InputListCreator((App) getApplication());
         inputListCreator.createInputItemEditDialog(InputListActivity.this, new InputListCreator.InputEditDialogEventListener() {
             @Override
@@ -119,6 +119,12 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
             item.setChecked(!item.isChecked());
             SharedPreferencesUtil.saveBoolean(this, getString(R.string.app_name), SharedPreferencesUtil.PrefKeys.NOTIFICATION_SHOW_IN_BAR.getKey(), item.isChecked());
             return true;
+        } else if (id == R.id.action_info) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setView(R.layout.dialog_new_release)
+                    .setPositiveButton("閉じる", null)
+                    .setCancelable(true)
+                    .show();
         }
 
         return super.onOptionsItemSelected(item);

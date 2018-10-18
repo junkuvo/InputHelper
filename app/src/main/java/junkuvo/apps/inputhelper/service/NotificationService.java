@@ -4,24 +4,37 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 
 import com.squareup.seismic.ShakeDetector;
 
 import junkuvo.apps.inputhelper.OverlayActivity;
 import junkuvo.apps.inputhelper.R;
+import junkuvo.apps.inputhelper.util.SharedPreferencesUtil;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
-public class NotificationService extends Service implements ShakeDetector.Listener{
+public class NotificationService extends Service implements ShakeDetector.Listener {
 
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (!TextUtils.isEmpty(action) && action.equals("stopService")) {
+                stopOverlayPlayerService();
+            }
+        }
+    };
 
     @Override
     public void onCreate() {
@@ -35,17 +48,20 @@ public class NotificationService extends Service implements ShakeDetector.Listen
         SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         ShakeDetector shakeDetector = new ShakeDetector(this);
         shakeDetector.start(sensorManager);
+        registerReceiver(broadcastReceiver, new IntentFilter("stopService"));
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         stopOverlayPlayerService();
+        super.onDestroy();
     }
 
     private void stopOverlayPlayerService() {
+//        unregisterReceiver(broadcastReceiver);
         stopSelf();
+        broadcastReceiver = null;
     }
 
     @Nullable
@@ -99,6 +115,17 @@ public class NotificationService extends Service implements ShakeDetector.Listen
 //            }
 //        }
 
+        Intent stopIntent = new Intent("stopService");
+        PendingIntent resultPendingIntent = PendingIntent.getBroadcast(this, 0, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+//        notificationBuilder.setContentIntent(resultPendingIntent);
+
+        NotificationCompat.Action action =
+                new NotificationCompat.Action(
+                        0,
+                        "停止する",
+                        resultPendingIntent
+                );
+        notificationBuilder.addAction(action);
         // ロックスクリーン上でどう見えるか
         notificationBuilder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
         // PRIORITY_MINだとどこにも表示されなくなる
@@ -116,7 +143,10 @@ public class NotificationService extends Service implements ShakeDetector.Listen
 
     @Override
     public void hearShake() {
-        Intent intent = new Intent(this, OverlayActivity.class);
-        startActivity(intent);
+        boolean shakable = SharedPreferencesUtil.getBoolean(this, getString(R.string.app_name), SharedPreferencesUtil.PrefKeys.SHAKE.getKey(), false);
+        if (shakable) {
+            Intent intent = new Intent(this, OverlayActivity.class);
+            startActivity(intent);
+        }
     }
 }

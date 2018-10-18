@@ -8,6 +8,7 @@ import static android.content.Context.MODE_PRIVATE;
 public class SharedPreferencesUtil {
 
     public enum PrefKeys{
+        SHAKE("SHAKE"),
         NOTIFICATION_SHOW_IN_BAR("NOTIFICATION_SHOW_IN_BAR");
 
         private String key;

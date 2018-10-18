@@ -10,4 +10,12 @@
         android:checkable="true"
         android:checked="true"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_info"
+        android:icon="@drawable/ic_fiber_new_white_24dp"
+        android:title="新しい機能のお知らせ"
+        android:checkable="true"
+        android:checked="true"
+        app:showAsAction="always" />
 </menu>

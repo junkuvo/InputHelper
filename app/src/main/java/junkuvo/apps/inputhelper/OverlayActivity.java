@@ -6,10 +6,13 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 
 import junkuvo.apps.inputhelper.fragment.InputListFragment;
 import junkuvo.apps.inputhelper.fragment.OverlayInputListFragment;
 import junkuvo.apps.inputhelper.fragment.item.ListItemData;
+import junkuvo.apps.inputhelper.util.SharedPreferencesUtil;
 
 
 /**
@@ -21,6 +24,16 @@ public class OverlayActivity extends FragmentActivity implements InputListFragme
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_overlay);
         this.showDialog();
+
+        ((CheckBox)findViewById(R.id.cb_shake)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferencesUtil.saveBoolean(OverlayActivity.this, getString(R.string.app_name), SharedPreferencesUtil.PrefKeys.SHAKE.getKey(), isChecked);
+            }
+        });
+
+        boolean shakable = SharedPreferencesUtil.getBoolean(this, getString(R.string.app_name), SharedPreferencesUtil.PrefKeys.SHAKE.getKey(), false);
+        ((CheckBox)findViewById(R.id.cb_shake)).setChecked(shakable);
     }
 
     public void onDestroy() {

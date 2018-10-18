@@ -57,6 +57,7 @@ public class OverlayInputListFragment extends DialogFragment {
 
             }
         }, true);
+
         builder.setView(view);
         builder.setMessage("コピーしたいメモを\nタップしてください");
         builder.setPositiveButton("新しくメモする", new DialogInterface.OnClickListener() {
