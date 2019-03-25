@@ -3,6 +3,7 @@ package junkuvo.apps.inputhelper.util;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -46,5 +47,10 @@ public class IntentUtil {
         recognizer.startListening(intent);
         context.startActivityForResult(intent, RequestCode.VOICE_RECOGNIZER.getCode());
 //        startActivityForResult()
+    }
+
+    public static void startWeb(Context context, String url){
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        context.startActivity(intent);
     }
 }

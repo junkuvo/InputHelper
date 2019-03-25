@@ -11,4 +11,10 @@
         android:checked="true"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_privacy"
+        android:orderInCategory="9999"
+        android:title="プライバシーポリシー"
+        app:showAsAction="never"
+       />
 </menu>

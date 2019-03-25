@@ -21,6 +21,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
+import com.google.android.gms.ads.doubleclick.PublisherAdView;
+
 import java.util.List;
 
 import io.realm.OrderedRealmCollection;
@@ -39,6 +44,13 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
     FloatingActionButton fab;
     InputListRecyclerViewAdapter adapter;
     FloatingActionButton fabSpeak;
+    private PublisherAdRequest adRequest = new PublisherAdRequest.Builder()
+            .addTestDevice("EBAB8562A2BF0F81C1702F59F3E0E5C6")
+            .addTestDevice("F171E99944D7E61C3B4EE10FA9DF36A8")
+            .build();
+    private int adW;
+    private int adH;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,9 +66,11 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         Snackbar.make(findViewById(R.id.main), "通知からいつでも利用できるようになりました！", Snackbar.LENGTH_LONG).show();
 
         fabSpeak = findViewById(R.id.fab_speak);
-        fabSpeak.setOnClickListener(view -> {
-            IntentUtil.startVoiceRecognizer(this, this);
-        });
+        fabSpeak.setOnClickListener(view -> IntentUtil.startVoiceRecognizer(this, this));
+
+        adW = ((App) getApplication()).getAdW();
+        adH = ((App) getApplication()).getAdH();
+
     }
 
     private void showInputDialog() {
@@ -93,6 +107,18 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                 getIntent().removeExtra("FROM_OVERLAY");
             }
         }
+
+        PublisherAdView adView = findViewById(R.id.adView_publisher);
+        if (!adView.isLoading()) {
+            adView.loadAd(adRequest);
+            adView.setAdListener(new AdListener(){
+                @Override
+                public void onAdLoaded() {
+                    super.onAdLoaded();
+                    adView.setAdSizes(new AdSize(adW, adH));
+                }
+            });
+        }
     }
 
     private void startAnimationFab() {
@@ -125,6 +151,8 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
             item.setChecked(!item.isChecked());
             SharedPreferencesUtil.saveBoolean(this, getString(R.string.app_name), SharedPreferencesUtil.PrefKeys.NOTIFICATION_SHOW_IN_BAR.getKey(), item.isChecked());
             return true;
+        }else if(id == R.id.action_privacy){
+            IntentUtil.startWeb(this, "http://site-1308773-9967-2992.strikingly.com/");
         }
 
         return super.onOptionsItemSelected(item);
@@ -208,8 +236,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
 
     @Override
     public void onResults(Bundle bundle) {
-        List<String> recData = bundle.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
-        Log.d("okubookubo", recData.toString());
+//        List<String> recData = bundle.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
     }
 
     @Override
@@ -230,10 +257,12 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
             case VOICE_RECOGNIZER:
                 if (data != null) {
                     List<String> recData = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    Realm realm = ((App) getApplication()).getRealm();
-                    Log.d("okubookubo", recData.get(2));
-                    InputItemUtil.save(realm, recData.get(2));
-                    Snackbar.make(findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
+                    if (recData != null && recData.size() > 0) {
+                        Realm realm = ((App) getApplication()).getRealm();
+                        Log.d("okubookubo", recData.get(0));
+                        InputItemUtil.save(realm, recData.get(0));
+                        Snackbar.make(findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
+                    }
                 }
                 break;
         }
