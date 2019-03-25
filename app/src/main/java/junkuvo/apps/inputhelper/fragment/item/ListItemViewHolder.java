@@ -18,7 +18,7 @@ public class ListItemViewHolder extends RecyclerView.ViewHolder {
         super(itemView);
 
         mView = itemView;
-        mContentView = (AppCompatTextView) itemView.findViewById(R.id.title);
+        mContentView = itemView.findViewById(R.id.title);
         ivCopy = itemView.findViewById(R.id.ivCopy);
     }
 

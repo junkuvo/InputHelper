@@ -3,6 +3,9 @@ package junkuvo.apps.inputhelper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -10,14 +13,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+
+import java.util.List;
 
 import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
@@ -26,31 +30,33 @@ import junkuvo.apps.inputhelper.fragment.InputListRecyclerViewAdapter;
 import junkuvo.apps.inputhelper.fragment.item.ListItemData;
 import junkuvo.apps.inputhelper.service.NotificationService;
 import junkuvo.apps.inputhelper.util.InputItemUtil;
+import junkuvo.apps.inputhelper.util.IntentUtil;
 import junkuvo.apps.inputhelper.util.RealmUtil;
 import junkuvo.apps.inputhelper.util.SharedPreferencesUtil;
 
-public class InputListActivity extends AppCompatActivity implements InputListFragment.OnListFragmentInteractionListener {
+public class InputListActivity extends AppCompatActivity implements InputListFragment.OnListFragmentInteractionListener, RecognitionListener {
 
     FloatingActionButton fab;
     InputListRecyclerViewAdapter adapter;
+    FloatingActionButton fabSpeak;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_input_list);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showInputDialog();
-            }
-        });
-
+        fab = findViewById(R.id.fab);
+        fab.setOnClickListener(view -> showInputDialog());
         Intent intent = new Intent(this, NotificationService.class);
         startService(intent);
+        Snackbar.make(findViewById(R.id.main), "通知からいつでも利用できるようになりました！", Snackbar.LENGTH_LONG).show();
+
+        fabSpeak = findViewById(R.id.fab_speak);
+        fabSpeak.setOnClickListener(view -> {
+            IntentUtil.startVoiceRecognizer(this, this);
+        });
     }
 
     private void showInputDialog() {
@@ -90,8 +96,8 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
     }
 
     private void startAnimationFab() {
-        Animation blinkAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blink);
-        fab.startAnimation(blinkAnimation);
+//        Animation blinkAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blink);
+//        fab.startAnimation(blinkAnimation);
     }
 
     @Override
@@ -119,12 +125,6 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
             item.setChecked(!item.isChecked());
             SharedPreferencesUtil.saveBoolean(this, getString(R.string.app_name), SharedPreferencesUtil.PrefKeys.NOTIFICATION_SHOW_IN_BAR.getKey(), item.isChecked());
             return true;
-        } else if (id == R.id.action_info) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setView(R.layout.dialog_new_release)
-                    .setPositiveButton("閉じる", null)
-                    .setCancelable(true)
-                    .show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -142,32 +142,24 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("保存しておきたいメモを\n入力してください")
                 .setView(view)
-                .setPositiveButton("保存", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        String content = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
-                        InputItemUtil.update(realm, content, item.getId());
-                        Snackbar.make(findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
-                    }
+                .setPositiveButton("保存", (dialog, id) -> {
+                    String content1 = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
+                    InputItemUtil.update(realm, content1, item.getId());
+                    Snackbar.make(findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("キャンセル", null)
-                .setNeutralButton("削除", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        RealmUtil.deleteInputItem(realm, item.getId());
-                        Snackbar.make(findViewById(R.id.main), "削除しました！", Snackbar.LENGTH_SHORT).show();
-                        if (adapter.getItemCount() == 0) {
-                            ((InputListRecyclerViewAdapter) adapter).setEmptyLayout();
-                            startAnimationFab();
-                        }
+                .setNeutralButton("削除", (dialogInterface, i) -> {
+                    RealmUtil.deleteInputItem(realm, item.getId());
+                    Snackbar.make(findViewById(R.id.main), "削除しました！", Snackbar.LENGTH_SHORT).show();
+                    if (adapter.getItemCount() == 0) {
+                        ((InputListRecyclerViewAdapter) adapter).setEmptyLayout();
+                        startAnimationFab();
                     }
                 });
         final AlertDialog dialog = builder.create();
-        view.findViewById(R.id.et_content).setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && dialog.getWindow() != null) {
-                    dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-                }
+        view.findViewById(R.id.et_content).setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus && dialog.getWindow() != null) {
+                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             }
         });
         dialog.show();
@@ -180,25 +172,70 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-//        if(KeyEvent.ACTION_DOWN == event.getAction()){
-//            if(event.getKeyCode() == KeyEvent.KEYCODE_BACK){
-//                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//                builder.setMessage("アプリを終了しますか？\n通知バーからのコピーができなくなります");
-//                builder.setPositiveButton("終了", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialogInterface, int i) {
-//                        finish();
-//                    }
-//                });
-//                builder.setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialogInterface, int i) {
-//                    }
-//                });
-//                builder.show();
-//            }
-//
-//        }
+
         return super.dispatchKeyEvent(event);
+    }
+
+    @Override
+    public void onReadyForSpeech(Bundle bundle) {
+
+    }
+
+    @Override
+    public void onBeginningOfSpeech() {
+
+    }
+
+    @Override
+    public void onRmsChanged(float v) {
+
+    }
+
+    @Override
+    public void onBufferReceived(byte[] bytes) {
+
+    }
+
+    @Override
+    public void onEndOfSpeech() {
+
+    }
+
+    @Override
+    public void onError(int i) {
+
+    }
+
+    @Override
+    public void onResults(Bundle bundle) {
+        List<String> recData = bundle.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION);
+        Log.d("okubookubo", recData.toString());
+    }
+
+    @Override
+    public void onPartialResults(Bundle bundle) {
+
+    }
+
+    @Override
+    public void onEvent(int i, Bundle bundle) {
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        IntentUtil.RequestCode requestCodeParam = IntentUtil.RequestCode.getParam(requestCode);
+        switch (requestCodeParam) {
+            case VOICE_RECOGNIZER:
+                if (data != null) {
+                    List<String> recData = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    Realm realm = ((App) getApplication()).getRealm();
+                    Log.d("okubookubo", recData.get(2));
+                    InputItemUtil.save(realm, recData.get(2));
+                    Snackbar.make(findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
+                }
+                break;
+        }
     }
 }

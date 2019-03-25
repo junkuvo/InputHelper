@@ -55,37 +55,30 @@ public class InputListCreator {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setMessage("保存しておきたいメモを\n入力してください")
                 .setView(view)
-                .setPositiveButton("保存", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
+                .setPositiveButton("保存", (dialog, id) -> {
 
-                        String content = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
-                        InputItemUtil.save(realm, content);
-                        Snackbar.make(activity.findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
+                    String content = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
+                    InputItemUtil.save(realm, content);
+                    Snackbar.make(activity.findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
 
-                        if (inputEditDialogEventListener != null) {
-                            inputEditDialogEventListener.onPositiveButtonClick(dialog, id);
-                        }
+                    if (inputEditDialogEventListener != null) {
+                        inputEditDialogEventListener.onPositiveButtonClick(dialog, id);
                     }
                 })
-                .setNegativeButton("キャンセル", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
+                .setNegativeButton("キャンセル", (dialog, id) -> {
 //                        // User cancelled the dialog
 //                        if(activity instanceof OverlayActivity){
 //                            ((OverlayActivity) activity).finish();
 //                        }
-                        if (inputEditDialogEventListener != null) {
-                            inputEditDialogEventListener.onNegativeButtonClick(dialog, id);
-                        }
+                    if (inputEditDialogEventListener != null) {
+                        inputEditDialogEventListener.onNegativeButtonClick(dialog, id);
                     }
                 });
 
         final AlertDialog dialog = builder.create();
-        view.findViewById(R.id.et_content).setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && dialog.getWindow() != null) {
-                    dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-                }
+        view.findViewById(R.id.et_content).setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus && dialog.getWindow() != null) {
+                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             }
         });
         return dialog;

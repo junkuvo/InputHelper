@@ -9,22 +9,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
-import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 
-import com.squareup.seismic.ShakeDetector;
-
 import junkuvo.apps.inputhelper.OverlayActivity;
 import junkuvo.apps.inputhelper.R;
-import junkuvo.apps.inputhelper.util.SharedPreferencesUtil;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
-public class NotificationService extends Service implements ShakeDetector.Listener {
+public class NotificationService extends Service {
 
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -44,10 +40,6 @@ public class NotificationService extends Service implements ShakeDetector.Listen
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         startServiceForeground();
-
-        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        ShakeDetector shakeDetector = new ShakeDetector(this);
-        shakeDetector.start(sensorManager);
         registerReceiver(broadcastReceiver, new IntentFilter("stopService"));
         return super.onStartCommand(intent, flags, startId);
     }
@@ -122,14 +114,18 @@ public class NotificationService extends Service implements ShakeDetector.Listen
         NotificationCompat.Action action =
                 new NotificationCompat.Action(
                         0,
-                        "停止する",
+                        "通知から消す",
                         resultPendingIntent
                 );
+
+        // todo メモトップをコピーするアクション
+
+        notificationBuilder.mActions.clear();
         notificationBuilder.addAction(action);
         // ロックスクリーン上でどう見えるか
         notificationBuilder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
         // PRIORITY_MINだとどこにも表示されなくなる
-        notificationBuilder.setPriority(NotificationCompat.PRIORITY_MIN);
+        notificationBuilder.setPriority(NotificationCompat.PRIORITY_MAX);
 
         startForeground(R.string.app_name, notificationBuilder.build());
     }
@@ -139,14 +135,5 @@ public class NotificationService extends Service implements ShakeDetector.Listen
             notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         }
         return notificationManager;
-    }
-
-    @Override
-    public void hearShake() {
-        boolean shakable = SharedPreferencesUtil.getBoolean(this, getString(R.string.app_name), SharedPreferencesUtil.PrefKeys.SHAKE.getKey(), false);
-        if (shakable) {
-            Intent intent = new Intent(this, OverlayActivity.class);
-            startActivity(intent);
-        }
     }
 }

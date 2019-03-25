@@ -50,7 +50,6 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
         itemData.setDetails("右下のボタンから\nよく使うデータや忘れたくないことをメモしておきましょう♪");
         mListItemData = new RealmList<>();
         mListItemData.add(itemData);
-        isEmpty = true;
     }
 
     public InputListRecyclerViewAdapter(@NonNull Context context, @Nullable OrderedRealmCollection<ListItemData> items, boolean autoUpdate, OnListFragmentInteractionListener listener) {
@@ -72,11 +71,10 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
         mListItemData = items;
 
         if (items != null) {
-            if (items.size() > 0) {
-                isEmpty = false;
-            } else {
+            if (items.size() == 0) {
                 setEmptyLayout();
             }
+            isEmpty = false;
         }
         mListener.onListAdapterCreated(this);
     }
@@ -90,30 +88,24 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
 
     @Override
     public void onBindViewHolder(@NonNull ListItemViewHolder holder, int position) {
-        final ListItemViewHolder viewHolder = (ListItemViewHolder) holder;
+        final ListItemViewHolder viewHolder = holder;
         viewHolder.mItem = mListItemData.get(position);
         viewHolder.mContentView.setText(mListItemData.get(position).getDetails());
 
         if (!isEmpty) {
-            viewHolder.mView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (null != mListener) {
-                        // Notify the active callbacks interface (the activity, if the
-                        // fragment is attached to one) that an item has been selected.
-                        mListener.onListFragmentInteraction(InputListRecyclerViewAdapter.this, viewHolder.mItem);
-                    }
+            viewHolder.mView.setOnClickListener(v -> {
+                if (null != mListener) {
+                    // Notify the active callbacks interface (the activity, if the
+                    // fragment is attached to one) that an item has been selected.
+                    mListener.onListFragmentInteraction(InputListRecyclerViewAdapter.this, viewHolder.mItem);
                 }
             });
         } else {
-            viewHolder.mView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(view.getContext(), InputListActivity.class);
-                    view.getContext().startActivity(intent);
-                    if (view.getContext() instanceof OverlayActivity) {
-                        ((OverlayActivity) view.getContext()).finish();
-                    }
+            viewHolder.mView.setOnClickListener(view -> {
+                Intent intent = new Intent(view.getContext(), InputListActivity.class);
+                view.getContext().startActivity(intent);
+                if (view.getContext() instanceof OverlayActivity) {
+                    ((OverlayActivity) view.getContext()).finish();
                 }
             });
         }

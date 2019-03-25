@@ -50,6 +50,10 @@ public class OverlayInputListFragment extends DialogFragment {
             public void onListFragmentInteraction(RecyclerView.Adapter adapter, ListItemData item) {
                 ClipboardUtil.copy(getContext(), item.getDetails());
                 Toast.makeText(getContext(), item.getDetails() + "\nコピーしました！", Toast.LENGTH_SHORT).show();
+                dismiss();
+//                if (getActivity() != null) {
+//                    getActivity().finish();
+//                }
             }
 
             @Override
@@ -60,21 +64,13 @@ public class OverlayInputListFragment extends DialogFragment {
 
         builder.setView(view);
         builder.setMessage("コピーしたいメモを\nタップしてください");
-        builder.setPositiveButton("新しくメモする", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(getContext(), InputListActivity.class);
-                intent.putExtra("FROM_OVERLAY", true);
-                startActivity(intent);
-                getActivity().finish();
-            }
+        builder.setPositiveButton("新しいメモの追加", (dialog, which) -> {
+            Intent intent = new Intent(getContext(), InputListActivity.class);
+            intent.putExtra("FROM_OVERLAY", true);
+            startActivity(intent);
+            getActivity().finish();
         });
-        builder.setNegativeButton("閉じる", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                getActivity().finish();
-            }
-        });
+        builder.setNegativeButton("キャンセル", (dialogInterface, i) -> getActivity().finish());
         builder.setCancelable(true);
         return builder.create();
     }
@@ -82,6 +78,8 @@ public class OverlayInputListFragment extends DialogFragment {
     @Override
     public void onCancel(DialogInterface dialog) {
         super.onCancel(dialog);
-        getActivity().finish();
+        if (getActivity() != null) {
+            getActivity().finish();
+        }
     }
 }
