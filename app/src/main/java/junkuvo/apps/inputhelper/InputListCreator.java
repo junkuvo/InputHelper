@@ -23,6 +23,7 @@ import junkuvo.apps.inputhelper.fragment.InputListRecyclerViewAdapter;
 import junkuvo.apps.inputhelper.fragment.item.ListItemData;
 import junkuvo.apps.inputhelper.util.InputItemUtil;
 import junkuvo.apps.inputhelper.util.RealmUtil;
+import junkuvo.apps.inputhelper.util.VibrateUtil;
 
 public class InputListCreator {
 
@@ -77,6 +78,7 @@ public class InputListCreator {
             String content = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
             if (TextUtils.isEmpty(content.trim())) {
                 Toast.makeText(activity, "メモが空っぽです。", Toast.LENGTH_SHORT).show();
+                VibrateUtil.vibrateError(activity);
             }else {
                 dialog.dismiss();
                 InputItemUtil.save(realm, content);

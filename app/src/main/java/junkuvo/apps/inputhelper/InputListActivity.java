@@ -41,6 +41,7 @@ import junkuvo.apps.inputhelper.util.InputItemUtil;
 import junkuvo.apps.inputhelper.util.IntentUtil;
 import junkuvo.apps.inputhelper.util.RealmUtil;
 import junkuvo.apps.inputhelper.util.SharedPreferencesUtil;
+import junkuvo.apps.inputhelper.util.VibrateUtil;
 
 public class InputListActivity extends AppCompatActivity implements InputListFragment.OnListFragmentInteractionListener, RecognitionListener {
 
@@ -186,6 +187,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
             String content1 = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
             if (TextUtils.isEmpty(content1.trim())) {
                 Toast.makeText(this, "メモが空っぽです。", Toast.LENGTH_SHORT).show();
+                VibrateUtil.vibrateError(this);
             } else {
                 dialog.dismiss();
                 InputItemUtil.update(realm, content1, item.getId());

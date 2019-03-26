@@ -75,7 +75,6 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
         final ListItemViewHolder viewHolder = holder;
         viewHolder.mItem = mListItemData.get(position);
         viewHolder.mContentView.setText(mListItemData.get(position).getDetails());
-
         viewHolder.mView.setOnClickListener(v -> {
             if (null != mListener) {
                 // Notify the active callbacks interface (the activity, if the

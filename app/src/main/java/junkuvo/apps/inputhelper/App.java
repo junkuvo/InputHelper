@@ -1,7 +1,7 @@
 package junkuvo.apps.inputhelper;
 
 
-import android.app.Application;
+import android.support.multidex.MultiDexApplication;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.MobileAds;
@@ -10,7 +10,7 @@ import io.fabric.sdk.android.Fabric;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
-public class App extends Application {
+public class App extends MultiDexApplication {
 
     private AppRealmMigration realmMigration = new AppRealmMigration();
     private Realm realm;
