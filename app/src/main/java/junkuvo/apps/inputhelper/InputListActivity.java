@@ -66,7 +66,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         Snackbar.make(findViewById(R.id.main), "通知からいつでも利用できるようになりました！", Snackbar.LENGTH_LONG).show();
 
         fabSpeak = findViewById(R.id.fab_speak);
-        fabSpeak.setOnClickListener(view -> IntentUtil.startVoiceRecognizer(this, this));
+        fabSpeak.setOnClickListener(view -> IntentUtil.startVoiceRecognizer(this, this, findViewById(R.id.main)));
 
         adW = ((App) getApplication()).getAdW();
         adH = ((App) getApplication()).getAdH();
@@ -78,13 +78,13 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         inputListCreator.createInputItemEditDialog(InputListActivity.this, new InputListCreator.InputEditDialogEventListener() {
             @Override
             public void onPositiveButtonClick(DialogInterface dialogInterface, int id) {
-                if (adapter.isEmpty()) {
+//                if (adapter.isEmpty()) {
                     OrderedRealmCollection<ListItemData> list = RealmUtil.selectAllItem(((App) getApplication()).getRealm());
                     if ((list != null) && list.size() > 0) {
                         adapter.setRealmReferenceToAdapter(list);
                         fab.clearAnimation();
                     }
-                }
+//                }
             }
 
             @Override

@@ -56,7 +56,6 @@ public class InputListCreator {
         builder.setMessage("保存しておきたいメモを\n入力してください")
                 .setView(view)
                 .setPositiveButton("保存", (dialog, id) -> {
-
                     String content = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
                     InputItemUtil.save(realm, content);
                     Snackbar.make(activity.findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();

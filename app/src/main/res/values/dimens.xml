@@ -1,4 +1,25 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+
+    <dimen name="basic_margin_24dp">24dp</dimen>
+    <dimen name="basic_margin_20dp">20dp</dimen>
+    <dimen name="basic_margin_32dp">32dp</dimen>
+    <dimen name="basic_margin_36dp">36dp</dimen>
+    <dimen name="basic_margin_38dp">38dp</dimen>
+    <dimen name="basic_margin_40dp">40dp</dimen>
+    <dimen name="basic_margin_64dp">64dp</dimen>
+    <dimen name="basic_margin_56dp">56dp</dimen>
+    <dimen name="basic_margin_112dp">112dp</dimen>
+    <dimen name="basic_margin_72dp">72dp</dimen>
+    <dimen name="basic_margin_80dp">80dp</dimen>
+    <dimen name="basic_margin_16dp">16dp</dimen>
+    <dimen name="basic_margin_14dp">14dp</dimen>
+    <dimen name="basic_margin_12dp">12dp</dimen>
+    <dimen name="basic_margin_10dp">10dp</dimen>
+    <dimen name="basic_margin_8dp">8dp</dimen>
+    <dimen name="basic_margin_7dp">7dp</dimen>
+    <dimen name="basic_margin_6dp">6dp</dimen>
+    <dimen name="basic_margin_4dp">4dp</dimen>
+    <dimen name="basic_margin_2dp">2dp</dimen>
 </resources>

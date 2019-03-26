@@ -45,7 +45,7 @@
             android:layout_marginLeft="@dimen/fab_margin"
             android:layout_marginRight="@dimen/fab_margin"
             android:layout_marginTop="@dimen/fab_margin"
-            app:backgroundTint="@color/basic_gray300"
+            app:backgroundTint="@color/basic_gray100"
             android:tint="@color/colorAccent"
             android:src="@drawable/ic_keyboard_voice_black_24dp" />
 
@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/fab_margin"
             android:tint="@android:color/white"
-            android:src="@drawable/ic_add_black_24dp" />
+            android:src="@drawable/ic_mode_edit_black_24dp" />
 
     </LinearLayout>
 

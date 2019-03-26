@@ -7,6 +7,9 @@ import android.net.Uri;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.view.View;
 
 import io.reactivex.Observable;
 import junkuvo.apps.inputhelper.OverlayActivity;
@@ -38,15 +41,25 @@ public class IntentUtil {
         context.startActivity(intent);
     }
 
-    public static void startVoiceRecognizer(Activity context, RecognitionListener recognitionListener){
+    public static void startVoiceRecognizer(Activity context, RecognitionListener recognitionListener,@Nullable View view){
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.getPackageName());
-        SpeechRecognizer recognizer = SpeechRecognizer.createSpeechRecognizer(context);
-        recognizer.setRecognitionListener(recognitionListener);
-        recognizer.startListening(intent);
-        context.startActivityForResult(intent, RequestCode.VOICE_RECOGNIZER.getCode());
+        if (hasVoiceRecognizer(context, intent)) {
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.getPackageName());
+            SpeechRecognizer recognizer = SpeechRecognizer.createSpeechRecognizer(context);
+            recognizer.setRecognitionListener(recognitionListener);
+            recognizer.startListening(intent);
+            context.startActivityForResult(intent, RequestCode.VOICE_RECOGNIZER.getCode());
 //        startActivityForResult()
+        }else {
+            if (view != null) {
+                Snackbar.make(view, "お客様の端末は音声をテキストに変換する機能に対応していないようです…", Snackbar.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    public static boolean hasVoiceRecognizer(Context context, Intent intent){
+        return intent.resolveActivity(context.getPackageManager()) != null;
     }
 
     public static void startWeb(Context context, String url){

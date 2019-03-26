@@ -3,15 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="32dp">
+    android:paddingTop="@dimen/basic_margin_8dp"
+    android:paddingLeft="24dp"
+    android:paddingRight="24dp">
 
     <android.support.v7.widget.AppCompatEditText
         android:id="@+id/et_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:lineSpacingMultiplier="1.1"
+        android:lineSpacingExtra="0.1dp"
         android:gravity="left"
         android:hint="メールアドレス,住所や\n買い物リストなどをメモしましょう！"
-        android:maxLines="8"
-        tools:text="aaaああああああ"
+        android:textSize="16sp"
+        android:lines="5"
+        tools:text="@tools:sample/lorem/random"
         />
 </LinearLayout>
