@@ -9,9 +9,12 @@ import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.Toast;
 
 import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
@@ -46,7 +49,7 @@ public class InputListCreator {
         }
     }
 
-    public AlertDialog createInputItemEditDialog(final Activity activity, @Nullable final InputEditDialogEventListener inputEditDialogEventListener) {
+    public AlertDialog showInputItemEditDialog(final Activity activity, @Nullable final InputEditDialogEventListener inputEditDialogEventListener) {
 
         LayoutInflater layoutInflater = activity.getLayoutInflater();
         final View view = layoutInflater.inflate(R.layout.dialog_save_data, null);
@@ -55,29 +58,32 @@ public class InputListCreator {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setMessage("保存しておきたいメモを\n入力してください")
                 .setView(view)
-                .setPositiveButton("保存", (dialog, id) -> {
-                    String content = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
-                    InputItemUtil.save(realm, content);
-                    Snackbar.make(activity.findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
-
-                    if (inputEditDialogEventListener != null) {
-                        inputEditDialogEventListener.onPositiveButtonClick(dialog, id);
-                    }
-                })
+                .setPositiveButton("保存", null)
                 .setNegativeButton("キャンセル", (dialog, id) -> {
-//                        // User cancelled the dialog
-//                        if(activity instanceof OverlayActivity){
-//                            ((OverlayActivity) activity).finish();
-//                        }
                     if (inputEditDialogEventListener != null) {
                         inputEditDialogEventListener.onNegativeButtonClick(dialog, id);
                     }
                 });
 
-        final AlertDialog dialog = builder.create();
+        final AlertDialog dialog = builder.show();
         view.findViewById(R.id.et_content).setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus && dialog.getWindow() != null) {
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            }
+        });
+
+        Button button = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        button.setOnClickListener(view1 -> {
+            String content = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
+            if (TextUtils.isEmpty(content.trim())) {
+                Toast.makeText(activity, "メモが空っぽです。", Toast.LENGTH_SHORT).show();
+            }else {
+                dialog.dismiss();
+                InputItemUtil.save(realm, content);
+                Snackbar.make(activity.findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
+                if (inputEditDialogEventListener != null) {
+                    inputEditDialogEventListener.onPositiveButtonClick(dialog, DialogInterface.BUTTON_POSITIVE);
+                }
             }
         });
         return dialog;

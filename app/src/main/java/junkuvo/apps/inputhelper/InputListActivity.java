@@ -22,6 +22,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
@@ -79,7 +81,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
 
     private void showInputDialog() {
         InputListCreator inputListCreator = new InputListCreator((App) getApplication());
-        inputListCreator.createInputItemEditDialog(InputListActivity.this, new InputListCreator.InputEditDialogEventListener() {
+        inputListCreator.showInputItemEditDialog(InputListActivity.this, new InputListCreator.InputEditDialogEventListener() {
             @Override
             public void onPositiveButtonClick(DialogInterface dialogInterface, int id) {
 //                if (adapter.isEmpty()) {
@@ -95,7 +97,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
             public void onNegativeButtonClick(DialogInterface dialogInterface, int id) {
 
             }
-        }).show();
+        });
     }
 
     @Override
@@ -174,15 +176,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("保存しておきたいメモを\n入力してください")
                 .setView(view)
-                .setPositiveButton("保存", (dialog, id) -> {
-                    String content1 = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
-                    if (TextUtils.isEmpty(content1.trim())) {
-                        Snackbar.make(clMain, "メモが空っぽです。", Snackbar.LENGTH_SHORT).show();
-                    }else {
-                        InputItemUtil.update(realm, content1, item.getId());
-                        Snackbar.make(clMain, "保存しました！", Snackbar.LENGTH_SHORT).show();
-                    }
-                })
+                .setPositiveButton("保存", null)
                 .setNegativeButton("キャンセル", null)
                 .setNeutralButton("削除", (dialogInterface, i) -> {
                     RealmUtil.deleteInputItem(realm, item.getId());
@@ -192,13 +186,23 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                         startAnimationFab();
                     }
                 });
-        final AlertDialog dialog = builder.create();
+        final AlertDialog dialog = builder.show();
         view.findViewById(R.id.et_content).setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus && dialog.getWindow() != null) {
                 dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             }
         });
-        dialog.show();
+        Button button = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        button.setOnClickListener(view1 -> {
+            String content1 = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
+            if (TextUtils.isEmpty(content1.trim())) {
+                Toast.makeText(this, "メモが空っぽです。", Toast.LENGTH_SHORT).show();
+            }else {
+                dialog.dismiss();
+                InputItemUtil.update(realm, content1, item.getId());
+                Snackbar.make(clMain, "保存しました！", Snackbar.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
