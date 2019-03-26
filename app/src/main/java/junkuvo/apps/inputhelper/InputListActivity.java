@@ -21,7 +21,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 
-import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
 import com.google.android.gms.ads.doubleclick.PublisherAdView;
@@ -47,6 +46,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
     private PublisherAdRequest adRequest = new PublisherAdRequest.Builder()
             .addTestDevice("EBAB8562A2BF0F81C1702F59F3E0E5C6")
             .addTestDevice("F171E99944D7E61C3B4EE10FA9DF36A8")
+            .addTestDevice("D35B2B0C156F2B555B9D4F1E2902E7AF")
             .build();
     private int adW;
     private int adH;
@@ -109,15 +109,15 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         }
 
         PublisherAdView adView = findViewById(R.id.adView_publisher);
+        adView.setAdSizes(new AdSize(adW, adH));
         if (!adView.isLoading()) {
             adView.loadAd(adRequest);
-            adView.setAdListener(new AdListener(){
-                @Override
-                public void onAdLoaded() {
-                    super.onAdLoaded();
-                    adView.setAdSizes(new AdSize(adW, adH));
-                }
-            });
+//            adView.setAdListener(new AdListener(){
+//                @Override
+//                public void onAdLoaded() {
+//                    super.onAdLoaded();
+//                }
+//            });
         }
     }
 
