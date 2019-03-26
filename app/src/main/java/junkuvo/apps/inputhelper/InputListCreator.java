@@ -49,7 +49,7 @@ public class InputListCreator {
         }
     }
 
-    public AlertDialog showInputItemEditDialog(final Activity activity, @Nullable final InputEditDialogEventListener inputEditDialogEventListener) {
+    public void showInputItemEditDialog(final Activity activity, @Nullable final InputEditDialogEventListener inputEditDialogEventListener) {
 
         LayoutInflater layoutInflater = activity.getLayoutInflater();
         final View view = layoutInflater.inflate(R.layout.dialog_save_data, null);
@@ -86,7 +86,6 @@ public class InputListCreator {
                 }
             }
         });
-        return dialog;
     }
 
     interface InputEditDialogEventListener {

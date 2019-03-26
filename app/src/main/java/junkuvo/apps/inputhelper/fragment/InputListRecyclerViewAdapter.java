@@ -1,7 +1,6 @@
 package junkuvo.apps.inputhelper.fragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,11 +12,9 @@ import android.view.ViewGroup;
 
 import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
-import io.realm.RealmList;
 import io.realm.RealmRecyclerViewAdapter;
 import junkuvo.apps.inputhelper.App;
 import junkuvo.apps.inputhelper.InputListActivity;
-import junkuvo.apps.inputhelper.OverlayActivity;
 import junkuvo.apps.inputhelper.R;
 import junkuvo.apps.inputhelper.fragment.InputListFragment.OnListFragmentInteractionListener;
 import junkuvo.apps.inputhelper.fragment.item.ListItemData;
@@ -33,11 +30,6 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
 
     private OrderedRealmCollection<ListItemData> mListItemData;
     private OnListFragmentInteractionListener mListener;
-    private boolean isEmpty = true;
-
-    public boolean isEmpty() {
-        return isEmpty;
-    }
 
     /**
      * 空だったところに登録した時、Realmに参照を置き換える
@@ -46,16 +38,6 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
      */
     public void setRealmReferenceToAdapter(OrderedRealmCollection<ListItemData> itemDatas) {
         mListItemData = itemDatas;
-        if (itemDatas != null && itemDatas.size() > 0) {
-            isEmpty = false;
-        }
-    }
-
-    public void setEmptyLayout() {
-        ListItemData itemData = new ListItemData();
-        itemData.setDetails("右下のボタンから\nよく使うデータや忘れたくないことをメモしておきましょう♪");
-        mListItemData = new RealmList<>();
-        mListItemData.add(itemData);
     }
 
     public InputListRecyclerViewAdapter(@NonNull Context context, @Nullable OrderedRealmCollection<ListItemData> items, boolean autoUpdate, OnListFragmentInteractionListener listener) {
@@ -76,13 +58,9 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
         mListener = listener;
         mListItemData = items;
 
-        if (items != null) {
-            if (items.size() == 0) {
-                setEmptyLayout();
-            }
-            isEmpty = false;
+        if (mListener != null) {
+            mListener.onListAdapterCreated(this);
         }
-        mListener.onListAdapterCreated(this);
     }
 
     @NonNull
@@ -98,28 +76,19 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
         viewHolder.mItem = mListItemData.get(position);
         viewHolder.mContentView.setText(mListItemData.get(position).getDetails());
 
-        if (!isEmpty) {
-            viewHolder.mView.setOnClickListener(v -> {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(InputListRecyclerViewAdapter.this, viewHolder.mItem);
-                }
-            });
-        } else {
-            viewHolder.mView.setOnClickListener(view -> {
-                Intent intent = new Intent(view.getContext(), InputListActivity.class);
-                view.getContext().startActivity(intent);
-                if (view.getContext() instanceof OverlayActivity) {
-                    ((OverlayActivity) view.getContext()).finish();
-                }
-            });
-        }
+        viewHolder.mView.setOnClickListener(v -> {
+            if (null != mListener) {
+                // Notify the active callbacks interface (the activity, if the
+                // fragment is attached to one) that an item has been selected.
+                mListener.onListFragmentInteraction(InputListRecyclerViewAdapter.this, viewHolder.mItem);
+            }
+        });
 
         if (fromNotification) {
             viewHolder.ivCopy.setVisibility(View.VISIBLE);
             viewHolder.ivDelete.setVisibility(View.GONE);
         } else {
+            // 通知じゃなく、アプリから開いた場合
             viewHolder.ivCopy.setVisibility(View.GONE);
             if (getItemCount() > 0) {
                 viewHolder.ivDelete.setVisibility(View.VISIBLE);
@@ -135,8 +104,8 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
                     })
                             .setActionTextColor(Color.YELLOW)
                             .show();
-                    if (getItemCount() == 0) {
-                        setEmptyLayout();
+                    if (mListener instanceof InputListActivity) {
+                        ((InputListActivity) mListener).setEmptyLayout(getItemCount() == 0);
                     }
                 });
             }

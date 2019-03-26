@@ -8,6 +8,14 @@
     tools:context="junkuvo.apps.inputhelper.InputListActivity"
     tools:showIn="@layout/activity_input_list">
 
-    <include layout="@layout/fragment_input_list" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
+        <include
+            android:id="@+id/ll_empty"
+            layout="@layout/fragment_input_list_no_item" />
+
+        <include layout="@layout/fragment_input_list" />
+    </FrameLayout>
 </LinearLayout>

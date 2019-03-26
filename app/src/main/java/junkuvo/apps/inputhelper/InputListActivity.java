@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdSize;
@@ -54,6 +55,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
     private int adW;
     private int adH;
     private CoordinatorLayout clMain;
+    private LinearLayout llEmpty;
 
 
     @Override
@@ -75,7 +77,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
 
         adW = ((App) getApplication()).getAdW();
         adH = ((App) getApplication()).getAdH();
-
+        llEmpty = findViewById(R.id.ll_empty);
     }
 
     private void showInputDialog() {
@@ -83,13 +85,11 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         inputListCreator.showInputItemEditDialog(InputListActivity.this, new InputListCreator.InputEditDialogEventListener() {
             @Override
             public void onPositiveButtonClick(DialogInterface dialogInterface, int id) {
-//                if (adapter.isEmpty()) {
-                    OrderedRealmCollection<ListItemData> list = RealmUtil.selectAllItem(((App) getApplication()).getRealm());
-                    if ((list != null) && list.size() > 0) {
-                        adapter.setRealmReferenceToAdapter(list);
-                        fab.clearAnimation();
-                    }
-//                }
+                OrderedRealmCollection<ListItemData> list = RealmUtil.selectAllItem(((App) getApplication()).getRealm());
+                if ((list != null) && list.size() > 0) {
+                    adapter.setRealmReferenceToAdapter(list);
+                    setEmptyLayout(adapter.getItemCount() == 0);
+                }
             }
 
             @Override
@@ -102,10 +102,6 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
     @Override
     protected void onResume() {
         super.onResume();
-        if (adapter.isEmpty()) {
-            startAnimationFab();
-        }
-
         if (getIntent().hasExtra("FROM_OVERLAY")) {
             if (getIntent().getBooleanExtra("FROM_OVERLAY", false)) {
                 showInputDialog();
@@ -124,11 +120,8 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
 //                }
 //            });
         }
-    }
 
-    private void startAnimationFab() {
-//        Animation blinkAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blink);
-//        fab.startAnimation(blinkAnimation);
+        setEmptyLayout(adapter.getItemCount() == 0);
     }
 
     @Override
@@ -156,7 +149,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
             item.setChecked(!item.isChecked());
             SharedPreferencesUtil.saveBoolean(this, getString(R.string.app_name), SharedPreferencesUtil.PrefKeys.NOTIFICATION_SHOW_IN_BAR.getKey(), item.isChecked());
             return true;
-        }else if(id == R.id.action_privacy){
+        } else if (id == R.id.action_privacy) {
             IntentUtil.startWeb(this, "http://site-1308773-9967-2992.strikingly.com/");
         }
 
@@ -180,10 +173,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                 .setNeutralButton("削除", (dialogInterface, i) -> {
                     RealmUtil.deleteInputItem(realm, item.getId());
                     Snackbar.make(clMain, "削除しました！", Snackbar.LENGTH_SHORT).show();
-                    if (adapter.getItemCount() == 0) {
-                        ((InputListRecyclerViewAdapter) adapter).setEmptyLayout();
-                        startAnimationFab();
-                    }
+                    setEmptyLayout(adapter.getItemCount() == 0);
                 });
         final AlertDialog dialog = builder.show();
         view.findViewById(R.id.et_content).setOnFocusChangeListener((v, hasFocus) -> {
@@ -196,9 +186,10 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
             String content1 = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
             if (TextUtils.isEmpty(content1.trim())) {
                 Toast.makeText(this, "メモが空っぽです。", Toast.LENGTH_SHORT).show();
-            }else {
+            } else {
                 dialog.dismiss();
                 InputItemUtil.update(realm, content1, item.getId());
+                setEmptyLayout(adapter.getItemCount() == 0);
                 Snackbar.make(clMain, "保存しました！", Snackbar.LENGTH_SHORT).show();
             }
         });
@@ -279,9 +270,12 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                         adapter.setRealmReferenceToAdapter(list);
                         fab.clearAnimation();
                     }
-
                 }
                 break;
         }
+    }
+
+    public void setEmptyLayout(boolean isEmpty) {
+        llEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
     }
 }
