@@ -17,6 +17,13 @@ public class ListItemData extends RealmObject {
     public ListItemData() {
     }
 
+    public ListItemData(ListItemData listItemData) {
+        this.id = listItemData.id;
+        this.title = listItemData.title;
+        this.details = listItemData.details;
+        this.createDateTime = listItemData.createDateTime;
+    }
+
     public long getId() {
         return id;
     }

@@ -12,6 +12,7 @@ public class ListItemViewHolder extends RecyclerView.ViewHolder {
     public final View mView;
     public final AppCompatTextView mContentView;
     public final AppCompatImageView ivCopy;
+    public final AppCompatImageView ivDelete;
     public ListItemData mItem;
 
     public ListItemViewHolder(View itemView) {
@@ -20,6 +21,7 @@ public class ListItemViewHolder extends RecyclerView.ViewHolder {
         mView = itemView;
         mContentView = itemView.findViewById(R.id.title);
         ivCopy = itemView.findViewById(R.id.ivCopy);
+        ivDelete = itemView.findViewById(R.id.ivDelete);
     }
 
     @Override

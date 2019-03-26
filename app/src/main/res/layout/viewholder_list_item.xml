@@ -18,12 +18,25 @@
         android:ellipsize="end"
         android:layout_margin="@dimen/text_margin"
         tools:text="1234567890\nqwertyui"/>
+
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/ivCopy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:layout_gravity="center_vertical"
+        android:tint="@color/basic_gray600"
         android:src="@drawable/ic_content_copy_grey_500_24dp"/>
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/ivDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:layout_gravity="center_vertical"
+        android:visibility="gone"
+        android:tint="@color/basic_gray600"
+        android:src="@drawable/ic_delete_black_24dp"
+        tools:visibility="visible"/>
 
 </LinearLayout>

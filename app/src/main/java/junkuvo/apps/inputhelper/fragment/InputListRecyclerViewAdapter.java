@@ -2,22 +2,28 @@ package junkuvo.apps.inputhelper.fragment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import io.realm.OrderedRealmCollection;
+import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmRecyclerViewAdapter;
+import junkuvo.apps.inputhelper.App;
 import junkuvo.apps.inputhelper.InputListActivity;
 import junkuvo.apps.inputhelper.OverlayActivity;
 import junkuvo.apps.inputhelper.R;
 import junkuvo.apps.inputhelper.fragment.InputListFragment.OnListFragmentInteractionListener;
 import junkuvo.apps.inputhelper.fragment.item.ListItemData;
 import junkuvo.apps.inputhelper.fragment.item.ListItemViewHolder;
+import junkuvo.apps.inputhelper.util.InputItemUtil;
+import junkuvo.apps.inputhelper.util.RealmUtil;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link ListItemData} and makes a call to the
@@ -66,7 +72,7 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
         setHasStableIds(true);
     }
 
-    private void commonConstructor(@Nullable OrderedRealmCollection<ListItemData> items, OnListFragmentInteractionListener listener){
+    private void commonConstructor(@Nullable OrderedRealmCollection<ListItemData> items, OnListFragmentInteractionListener listener) {
         mListener = listener;
         mListItemData = items;
 
@@ -110,10 +116,30 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
             });
         }
 
-        if(fromNotification){
+        if (fromNotification) {
             viewHolder.ivCopy.setVisibility(View.VISIBLE);
-        }else{
+            viewHolder.ivDelete.setVisibility(View.GONE);
+        } else {
             viewHolder.ivCopy.setVisibility(View.GONE);
+            if (getItemCount() > 0) {
+                viewHolder.ivDelete.setVisibility(View.VISIBLE);
+                String content = getItem(position).getDetails();
+                long id = getItem(position).getId();
+                viewHolder.ivDelete.setOnClickListener(view -> {
+                    Realm realm = ((App) context.getApplicationContext()).getRealm();
+                    RealmUtil.deleteInputItem(realm, getItemId(position));
+                    Snackbar snackbar = Snackbar.make(view, "削除しました！", Snackbar.LENGTH_LONG);
+                    snackbar.setAction("元に戻す", view1 -> {
+                        InputItemUtil.update(realm, content, id);
+                        notifyItemInserted(position);
+                    })
+                            .setActionTextColor(Color.YELLOW)
+                            .show();
+                    if (getItemCount() == 0) {
+                        setEmptyLayout();
+                    }
+                });
+            }
         }
     }
 
@@ -125,5 +151,15 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
     @Override
     public long getItemId(int index) {
         return mListItemData.get(index).getId();
+    }
+
+    @Nullable
+    @Override
+    public ListItemData getItem(int index) {
+        if (getItemCount() > index) {
+            return mListItemData.get(index);
+        } else {
+            return null;
+        }
     }
 }
