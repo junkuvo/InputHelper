@@ -15,7 +15,6 @@ import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -271,10 +270,16 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                     List<String> recData = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     if (recData != null && recData.size() > 0) {
                         Realm realm = ((App) getApplication()).getRealm();
-                        Log.d("okubookubo", recData.get(0));
                         InputItemUtil.save(realm, recData.get(0));
                         Snackbar.make(clMain, "保存しました！", Snackbar.LENGTH_SHORT).show();
                     }
+
+                    OrderedRealmCollection<ListItemData> list = RealmUtil.selectAllItem(((App) getApplication()).getRealm());
+                    if ((list != null) && list.size() > 0) {
+                        adapter.setRealmReferenceToAdapter(list);
+                        fab.clearAnimation();
+                    }
+
                 }
                 break;
         }
