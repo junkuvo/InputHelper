@@ -17,7 +17,7 @@
         android:lineSpacingExtra="0.1dp"
         android:ellipsize="end"
         android:layout_margin="@dimen/text_margin"
-        tools:text="1234567890\nqwertyui"/>
+        tools:text="@tools:sample/lorem/random"/>
 
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/ivCopy"
@@ -32,7 +32,8 @@
         android:id="@+id/ivDelete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:padding="8dp"
+        android:layout_margin="@dimen/basic_margin_8dp"
         android:layout_gravity="center_vertical"
         android:visibility="gone"
         android:tint="@color/basic_gray600"

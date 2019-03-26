@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -50,6 +52,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
             .build();
     private int adW;
     private int adH;
+    private CoordinatorLayout clMain;
 
 
     @Override
@@ -59,14 +62,15 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        clMain = findViewById(R.id.main);
         fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> showInputDialog());
         Intent intent = new Intent(this, NotificationService.class);
         startService(intent);
-        Snackbar.make(findViewById(R.id.main), "通知からいつでも利用できるようになりました！", Snackbar.LENGTH_LONG).show();
+        Snackbar.make(clMain, "通知からいつでも利用できるようになりました！", Snackbar.LENGTH_LONG).show();
 
         fabSpeak = findViewById(R.id.fab_speak);
-        fabSpeak.setOnClickListener(view -> IntentUtil.startVoiceRecognizer(this, this, findViewById(R.id.main)));
+        fabSpeak.setOnClickListener(view -> IntentUtil.startVoiceRecognizer(this, this, clMain));
 
         adW = ((App) getApplication()).getAdW();
         adH = ((App) getApplication()).getAdH();
@@ -172,13 +176,17 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                 .setView(view)
                 .setPositiveButton("保存", (dialog, id) -> {
                     String content1 = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
-                    InputItemUtil.update(realm, content1, item.getId());
-                    Snackbar.make(findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
+                    if (TextUtils.isEmpty(content1.trim())) {
+                        Snackbar.make(clMain, "メモが空っぽです。", Snackbar.LENGTH_SHORT).show();
+                    }else {
+                        InputItemUtil.update(realm, content1, item.getId());
+                        Snackbar.make(clMain, "保存しました！", Snackbar.LENGTH_SHORT).show();
+                    }
                 })
                 .setNegativeButton("キャンセル", null)
                 .setNeutralButton("削除", (dialogInterface, i) -> {
                     RealmUtil.deleteInputItem(realm, item.getId());
-                    Snackbar.make(findViewById(R.id.main), "削除しました！", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(clMain, "削除しました！", Snackbar.LENGTH_SHORT).show();
                     if (adapter.getItemCount() == 0) {
                         ((InputListRecyclerViewAdapter) adapter).setEmptyLayout();
                         startAnimationFab();
@@ -261,7 +269,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                         Realm realm = ((App) getApplication()).getRealm();
                         Log.d("okubookubo", recData.get(0));
                         InputItemUtil.save(realm, recData.get(0));
-                        Snackbar.make(findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(clMain, "保存しました！", Snackbar.LENGTH_SHORT).show();
                     }
                 }
                 break;
