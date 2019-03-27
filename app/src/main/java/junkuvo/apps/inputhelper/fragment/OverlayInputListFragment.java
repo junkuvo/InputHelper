@@ -19,6 +19,7 @@ import junkuvo.apps.inputhelper.InputListCreator;
 import junkuvo.apps.inputhelper.R;
 import junkuvo.apps.inputhelper.fragment.item.ListItemData;
 import junkuvo.apps.inputhelper.util.ClipboardUtil;
+import junkuvo.apps.inputhelper.util.VibrateUtil;
 
 /**
  *
@@ -50,10 +51,11 @@ public class OverlayInputListFragment extends DialogFragment {
             public void onListFragmentInteraction(RecyclerView.Adapter adapter, ListItemData item) {
                 ClipboardUtil.copy(getContext(), item.getDetails());
                 Toast.makeText(getContext(), item.getDetails() + "\nコピーしました！", Toast.LENGTH_SHORT).show();
+                VibrateUtil.vibrate(getContext());
                 dismiss();
-//                if (getActivity() != null) {
-//                    getActivity().finish();
-//                }
+                if (getActivity() != null) {
+                    getActivity().finish();
+                }
             }
 
             @Override
