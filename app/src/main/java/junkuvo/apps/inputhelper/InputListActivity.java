@@ -70,8 +70,11 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> showInputDialog());
         Intent intent = new Intent(this, NotificationService.class);
+        if (adapter.getItemCount() > 0 && adapter.getItem(0) != null) {
+            intent.putExtra("item", adapter.getItem(0).getDetails());
+        }
         startService(intent);
-        Snackbar.make(clMain, "通知からいつでも利用できるようになりました！", Snackbar.LENGTH_LONG).show();
+//        Snackbar.make(clMain, "通知からいつでも利用できるようになりました！", Snackbar.LENGTH_LONG).show();
 
         fabSpeak = findViewById(R.id.fab_speak);
         fabSpeak.setOnClickListener(view -> IntentUtil.startVoiceRecognizer(this, this, clMain));

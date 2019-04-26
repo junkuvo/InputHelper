@@ -73,6 +73,11 @@ public class OverlayInputListFragment extends DialogFragment {
             getActivity().finish();
         });
         builder.setNegativeButton("キャンセル", (dialogInterface, i) -> getActivity().finish());
+        builder.setNeutralButton("アプリを開く", (dialogInterface, i) -> {
+            Intent intent = new Intent(getContext(), InputListActivity.class);
+            startActivity(intent);
+            getActivity().finish();
+        });
         builder.setCancelable(true);
         return builder.create();
     }

@@ -1,5 +1,6 @@
 package junkuvo.apps.inputhelper.service;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -15,6 +16,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 
+import junkuvo.apps.inputhelper.InputListActivity;
 import junkuvo.apps.inputhelper.OverlayActivity;
 import junkuvo.apps.inputhelper.R;
 
@@ -22,6 +24,7 @@ import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
 public class NotificationService extends Service {
 
+    private String firstItemDetail = "";
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -41,6 +44,9 @@ public class NotificationService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         startServiceForeground();
         registerReceiver(broadcastReceiver, new IntentFilter("stopService"));
+        if (intent.hasExtra("item")) {
+            firstItemDetail = intent.getStringExtra("item");
+        }
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -73,6 +79,7 @@ public class NotificationService extends Service {
      *
      * @see <a href=https://qiita.com/sakebook/items/8cafc0766b4f8dc95994>NotificationのStyleについて</a>
      */
+    @SuppressLint("RestrictedApi")
     public void startServiceForeground() {
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -89,7 +96,11 @@ public class NotificationService extends Service {
         notificationBuilder.setContentIntent(PendingIntent.getActivity(this, REQUEST_CODE_NOTIFICATION, intent, FLAG_UPDATE_CURRENT));
 
         notificationBuilder.setTicker(getString(R.string.app_name));
-        notificationBuilder.setContentTitle("メモをコピーする");
+        if (TextUtils.isEmpty(firstItemDetail)) {
+            notificationBuilder.setContentTitle("メモをコピーする");
+        }else {
+            notificationBuilder.setContentTitle(firstItemDetail);
+        }
         notificationBuilder.setContentText("タップでコピーしたいメモを選択できます");
         notificationBuilder.setSmallIcon(R.drawable.ic_stat_notification);
         notificationBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
@@ -113,15 +124,27 @@ public class NotificationService extends Service {
 
         NotificationCompat.Action action =
                 new NotificationCompat.Action(
-                        0,
+                        R.drawable.ic_close_black_24dp,
                         "通知から消す",
                         resultPendingIntent
                 );
+
+        Intent openIntent = new Intent(this, InputListActivity.class);
+        PendingIntent openPendingIntent = PendingIntent.getActivity(this, 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Action actionOpen =
+                new NotificationCompat.Action(
+                        R.drawable.ic_open_in_new_black_24dp,
+                        "アプリを開く",
+                        openPendingIntent
+                );
+
 
         // todo メモトップをコピーするアクション
 
         notificationBuilder.mActions.clear();
         notificationBuilder.addAction(action);
+        notificationBuilder.addAction(actionOpen);
         // ロックスクリーン上でどう見えるか
         notificationBuilder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
         // PRIORITY_MINだとどこにも表示されなくなる
