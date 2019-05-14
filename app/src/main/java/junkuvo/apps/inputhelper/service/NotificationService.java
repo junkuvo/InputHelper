@@ -42,11 +42,11 @@ public class NotificationService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        startServiceForeground();
         registerReceiver(broadcastReceiver, new IntentFilter("stopService"));
         if (intent.hasExtra("item")) {
             firstItemDetail = intent.getStringExtra("item");
         }
+        startServiceForeground();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -97,11 +97,14 @@ public class NotificationService extends Service {
 
         notificationBuilder.setTicker(getString(R.string.app_name));
         if (TextUtils.isEmpty(firstItemDetail)) {
-            notificationBuilder.setContentTitle("メモをコピーする");
+            notificationBuilder.setContentTitle("ここをタップでコピーしたいメモを選択できます");
+            notificationBuilder.setContentText("⬇へスワイプでメニュー表示");
         }else {
             notificationBuilder.setContentTitle(firstItemDetail);
+            notificationBuilder.setContentText("⬇へスワイプで全文表示");
+            notificationBuilder.setStyle(new NotificationCompat.BigTextStyle()
+                    .bigText(firstItemDetail));
         }
-        notificationBuilder.setContentText("タップでコピーしたいメモを選択できます");
         notificationBuilder.setSmallIcon(R.drawable.ic_stat_notification);
         notificationBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
 
