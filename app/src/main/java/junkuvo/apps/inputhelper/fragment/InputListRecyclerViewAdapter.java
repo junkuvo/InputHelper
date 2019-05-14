@@ -105,6 +105,7 @@ public class InputListRecyclerViewAdapter extends RealmRecyclerViewAdapter<ListI
                             .show();
                     if (mListener instanceof InputListActivity) {
                         ((InputListActivity) mListener).setEmptyLayout(getItemCount() == 0);
+                        ((InputListActivity) mListener).updateService();
                     }
                 });
             }

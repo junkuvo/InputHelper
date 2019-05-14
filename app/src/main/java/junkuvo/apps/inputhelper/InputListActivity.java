@@ -77,6 +77,10 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         adH = ((App) getApplication()).getAdH();
         llEmpty = findViewById(R.id.ll_empty);
 
+        updateService();
+    }
+
+     public void updateService(){
         Intent intentServiceStop = new Intent(this, NotificationService.class);
         stopService(intentServiceStop);
         Intent intent = new Intent(this, NotificationService.class);
@@ -95,6 +99,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                 if ((list != null) && list.size() > 0) {
                     adapter.setRealmReferenceToAdapter(list);
                     setEmptyLayout(adapter.getItemCount() == 0);
+                    updateService();
                 }
             }
 
@@ -180,6 +185,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                     RealmUtil.deleteInputItem(realm, item.getId());
                     Snackbar.make(clMain, "削除しました！", Snackbar.LENGTH_SHORT).show();
                     setEmptyLayout(adapter.getItemCount() == 0);
+                    updateService();
                 });
         final AlertDialog dialog = builder.show();
         view.findViewById(R.id.et_content).setOnFocusChangeListener((v, hasFocus) -> {
@@ -198,6 +204,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                 InputItemUtil.update(realm, content1, item.getId());
                 setEmptyLayout(adapter.getItemCount() == 0);
                 Snackbar.make(clMain, "保存しました！", Snackbar.LENGTH_SHORT).show();
+                updateService();
             }
         });
     }
@@ -270,6 +277,7 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
                         Realm realm = ((App) getApplication()).getRealm();
                         InputItemUtil.save(realm, recData.get(0));
                         Snackbar.make(clMain, "保存しました！", Snackbar.LENGTH_SHORT).show();
+                        updateService();
                     }
 
                     OrderedRealmCollection<ListItemData> list = RealmUtil.selectAllItem(((App) getApplication()).getRealm());
