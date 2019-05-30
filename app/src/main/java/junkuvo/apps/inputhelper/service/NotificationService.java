@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.util.Log;
 
 import junkuvo.apps.inputhelper.InputListActivity;
 import junkuvo.apps.inputhelper.OverlayActivity;
@@ -42,12 +43,16 @@ public class NotificationService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
         registerReceiver(broadcastReceiver, new IntentFilter("stopService"));
-        if (intent.hasExtra("item")) {
+        Log.d("okubookubo", "startaaaa");
+        if (intent != null && intent.hasExtra("item")) {
             firstItemDetail = intent.getStringExtra("item");
         }
-        startServiceForeground();
-        return super.onStartCommand(intent, flags, startId);
+
+        Log.d("okubookubo", "start");
+       startServiceForeground();
+        return START_STICKY;
     }
 
     @Override

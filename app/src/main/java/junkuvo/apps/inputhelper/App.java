@@ -2,6 +2,7 @@ package junkuvo.apps.inputhelper;
 
 
 import android.support.multidex.MultiDexApplication;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.MobileAds;
@@ -19,6 +20,7 @@ public class App extends MultiDexApplication {
     public void onCreate() {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
+        Log.d("okubookubo", "app");
 
         // realmの初期化
         Realm.init(this);
