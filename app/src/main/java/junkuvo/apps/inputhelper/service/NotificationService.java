@@ -15,7 +15,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
-import android.util.Log;
 
 import junkuvo.apps.inputhelper.InputListActivity;
 import junkuvo.apps.inputhelper.OverlayActivity;
@@ -45,13 +44,10 @@ public class NotificationService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         registerReceiver(broadcastReceiver, new IntentFilter("stopService"));
-        Log.d("okubookubo", "startaaaa");
         if (intent != null && intent.hasExtra("item")) {
             firstItemDetail = intent.getStringExtra("item");
         }
-
-        Log.d("okubookubo", "start");
-       startServiceForeground();
+        startServiceForeground();
         return START_STICKY;
     }
 
@@ -104,7 +100,7 @@ public class NotificationService extends Service {
         if (TextUtils.isEmpty(firstItemDetail)) {
             notificationBuilder.setContentTitle("ここをタップでコピーしたいメモを選択できます");
             notificationBuilder.setContentText("⬇へスワイプでメニュー表示");
-        }else {
+        } else {
             notificationBuilder.setContentTitle(firstItemDetail);
             notificationBuilder.setContentText("⬇へスワイプで全文表示");
             notificationBuilder.setStyle(new NotificationCompat.BigTextStyle()
