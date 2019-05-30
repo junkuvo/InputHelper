@@ -16,6 +16,8 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 
+import com.crashlytics.android.Crashlytics;
+
 import junkuvo.apps.inputhelper.InputListActivity;
 import junkuvo.apps.inputhelper.OverlayActivity;
 import junkuvo.apps.inputhelper.R;
@@ -58,7 +60,11 @@ public class NotificationService extends Service {
     }
 
     private void stopOverlayPlayerService() {
-//        unregisterReceiver(broadcastReceiver);
+        try {
+            unregisterReceiver(broadcastReceiver);
+        }catch (Exception e){
+            Crashlytics.logException(e);
+        }
         stopSelf();
         broadcastReceiver = null;
     }

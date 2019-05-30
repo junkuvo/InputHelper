@@ -54,7 +54,7 @@ public class RealmUtil {
         RealmResults<ListItemData> realmResults = null;
         try {
             realmResults = realm.where(ListItemData.class).findAll()
-                    .sort("id", Sort.ASCENDING);
+                    .sort("createDateTime", Sort.DESCENDING);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -83,18 +83,33 @@ public class RealmUtil {
     }
 
     public static void updateInputItem(Realm realm, final RealmObject realmResults) {
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                // This will create a new object in Realm or throw an exception if the
-                // object already exists (same primary key)
-                // realm.copyToRealm(obj);
+        realm.executeTransaction(realm1 -> {
+            // This will create a new object in Realm or throw an exception if the
+            // object already exists (same primary key)
+            // realm.copyToRealm(obj);
 //                ((ListItemData) realmResults.get(0)).setMemo(body);
 
-                // This will update an existing object with the same primary key
-                // or create a new object if an object with no primary key = 42
-                realm.copyToRealmOrUpdate(realmResults);
-            }
+            // This will update an existing object with the same primary key
+            // or create a new object if an object with no primary key = 42
+            realm1.copyToRealmOrUpdate(realmResults);
+        });
+    }
+
+    public static void moveItems(Realm realm, final long fromId, final long toId) {
+        realm.executeTransaction(realm1 -> {
+            // This will create a new object in Realm or throw an exception if the
+            // object already exists (same primary key)
+            // realm.copyToRealm(obj);
+//                ((ListItemData) realmResults.get(0)).setMemo(body);
+
+            // This will update an existing object with the same primary key
+            // or create a new object if an object with no primary key = 42
+            ListItemData fromItem = realm1.where(ListItemData.class).equalTo("id", fromId).findFirst();
+            ListItemData toItem = realm1.where(ListItemData.class).equalTo("id", toId).findFirst();
+            String changingTimeFrom = fromItem.getCreateDateTime();
+            String changingTimeTo = toItem.getCreateDateTime();
+            fromItem.setCreateDateTime(changingTimeTo);
+            toItem.setCreateDateTime(changingTimeFrom);
         });
     }
 

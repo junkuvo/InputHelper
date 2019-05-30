@@ -2,7 +2,6 @@ package junkuvo.apps.inputhelper;
 
 
 import android.support.multidex.MultiDexApplication;
-import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.MobileAds;

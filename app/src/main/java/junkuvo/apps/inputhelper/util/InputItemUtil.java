@@ -26,6 +26,10 @@ public class InputItemUtil {
         RealmUtil.updateInputItem(realm, listItemData);
     }
 
+    public static void updateTime(Realm realm, long fromId, long toId){
+        RealmUtil.moveItems(realm, fromId, toId);
+    }
+
     public static boolean showSoftInput(Context context, View view) {
         InputMethodManager imm =
                 (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);

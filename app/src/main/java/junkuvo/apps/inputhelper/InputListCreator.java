@@ -2,6 +2,7 @@ package junkuvo.apps.inputhelper;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -28,12 +29,17 @@ import junkuvo.apps.inputhelper.util.VibrateUtil;
 public class InputListCreator {
 
     private Realm realm;
+    private InputListRecyclerViewAdapter inputListRecyclerViewAdapter;
+
+    public InputListRecyclerViewAdapter getInputListRecyclerViewAdapter() {
+        return inputListRecyclerViewAdapter;
+    }
 
     public InputListCreator(App app) {
         realm = app.getRealm();
     }
 
-    public void prepareInputListView(View view, InputListFragment.OnListFragmentInteractionListener listener){
+    public void prepareInputListView(View view, InputListFragment.OnListFragmentInteractionListener listener) {
         prepareInputListView(view, listener, false);
     }
 
@@ -46,7 +52,8 @@ public class InputListCreator {
             DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), new LinearLayoutManager(view.getContext()).getOrientation());
             recyclerView.addItemDecoration(dividerItemDecoration);
 
-            recyclerView.setAdapter(new InputListRecyclerViewAdapter(view.getContext(), list, true, listener, fromNotification));
+            inputListRecyclerViewAdapter = new InputListRecyclerViewAdapter(view.getContext(), list, true, listener, fromNotification);
+            recyclerView.setAdapter(inputListRecyclerViewAdapter);
         }
     }
 
@@ -79,7 +86,7 @@ public class InputListCreator {
             if (TextUtils.isEmpty(content.trim())) {
                 Toast.makeText(activity, "メモが空っぽです。", Toast.LENGTH_SHORT).show();
                 VibrateUtil.vibrateError(activity);
-            }else {
+            } else {
                 dialog.dismiss();
                 InputItemUtil.save(realm, content);
                 Snackbar.make(activity.findViewById(R.id.main), "保存しました！", Snackbar.LENGTH_SHORT).show();
@@ -96,5 +103,8 @@ public class InputListCreator {
         void onNegativeButtonClick(DialogInterface dialogInterface, int id);
     }
 
+    public void move(@NonNull RecyclerView recyclerView, @NonNull ListItemData fromItem, @NonNull ListItemData toItem) {
+        InputItemUtil.updateTime(realm, fromItem.getId(), toItem.getId());
+    }
 }
 
