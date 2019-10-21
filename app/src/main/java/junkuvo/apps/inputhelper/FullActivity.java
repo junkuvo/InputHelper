@@ -1,96 +1,101 @@
-package junkuvo.apps.inputhelper.service;
+package junkuvo.apps.inputhelper;
 
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
-
-import junkuvo.apps.inputhelper.FullActivity;
-import junkuvo.apps.inputhelper.InputListActivity;
-import junkuvo.apps.inputhelper.OverlayActivity;
-import junkuvo.apps.inputhelper.R;
+import io.realm.Realm;
+import junkuvo.apps.inputhelper.fragment.InputListFragment;
+import junkuvo.apps.inputhelper.fragment.item.ListItemData;
+import junkuvo.apps.inputhelper.util.InputItemUtil;
+import junkuvo.apps.inputhelper.util.VibrateUtil;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+import static junkuvo.apps.inputhelper.service.NotificationService.REQUEST_CODE_NOTIFICATION;
+import static junkuvo.apps.inputhelper.service.NotificationService.channelId;
+import static junkuvo.apps.inputhelper.service.NotificationService.channelName;
 
-public class NotificationService extends Service {
 
-    private String firstItemDetail = "";
-    private long firstItemId = 0L;
-    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (!TextUtils.isEmpty(action) && action.equals("stopService")) {
-                stopOverlayPlayerService();
-            }
+/**
+ *
+ */
+public class FullActivity extends FragmentActivity implements InputListFragment.OnListFragmentInteractionListener {
+
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.activity_overlay);
+        if (getIntent().hasExtra("id") && getIntent().hasExtra("detail")) {
+            this.showDialog(getIntent().getStringExtra("detail"), getIntent().getLongExtra("id", 0L));
+        } else {
+            finish();
         }
-    };
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
-        registerReceiver(broadcastReceiver, new IntentFilter("stopService"));
-        if (intent != null && intent.hasExtra("detail")) {
-            firstItemDetail = intent.getStringExtra("detail");
-            firstItemId = intent.getLongExtra("id", 0L);
-        }
-        startServiceForeground();
-        return START_STICKY;
-    }
-
-    @Override
     public void onDestroy() {
-        stopOverlayPlayerService();
+        this.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         super.onDestroy();
     }
 
-    private void stopOverlayPlayerService() {
-        try {
-            unregisterReceiver(broadcastReceiver);
-        } catch (Exception e) {
-            Crashlytics.logException(e);
-        }
-        stopSelf();
-        broadcastReceiver = null;
+    private void showDialog(String content, long id) {
+        final Realm realm = ((App) getApplication()).getRealm();
+        LayoutInflater layoutInflater = getLayoutInflater();
+        final View view = layoutInflater.inflate(R.layout.dialog_save_data, null);
+        ((AppCompatEditText) view.findViewById(R.id.et_content)).setText(content);
+
+        // Use the Builder class for convenient dialog construction
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("保存しておきたいメモを\n入力してください")
+                .setView(view)
+                .setPositiveButton("保存", null)
+                .setNegativeButton("キャンセル", (dialog, which) -> finish());
+        final AlertDialog dialog = builder.show();
+        view.findViewById(R.id.et_content).setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus && dialog.getWindow() != null) {
+                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            }
+        });
+
+        Button button = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        button.setOnClickListener(view1 -> {
+            String content1 = ((AppCompatEditText) view.findViewById(R.id.et_content)).getText().toString();
+            if (TextUtils.isEmpty(content1.trim())) {
+                Toast.makeText(this, "メモが空っぽです。", Toast.LENGTH_SHORT).show();
+                VibrateUtil.vibrateError(this);
+            } else {
+                dialog.dismiss();
+                InputItemUtil.update(realm, content1, id);
+                Toast.makeText(FullActivity.this, "保存しました！", Toast.LENGTH_SHORT).show();
+                updateService(content1, id);
+                finish();
+            }
+        });
     }
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    public static final String channelId = "InputHelper_channel_id";
-    public static final CharSequence channelName = "タップしてコピー";
     NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId);
-    private NotificationManager notificationManager;
-    public static final int REQUEST_CODE_NOTIFICATION = 99;
 
-    /**
-     * サービスを永続化するために、通知を作成する。これないと、タスクと一緒にOverlayもkillされる
-     *
-     * @see <a href=https://qiita.com/sakebook/items/8cafc0766b4f8dc95994>NotificationのStyleについて</a>
-     */
     @SuppressLint("RestrictedApi")
-    public void startServiceForeground() {
+    public void updateService(String firstItemDetail, long firstItemId) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             // LOWじゃないと振動する。DEFAULTでは振動するが、上からポップアップはでない。
@@ -98,7 +103,7 @@ public class NotificationService extends Service {
             notificationChannel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
             notificationChannel.enableVibration(false);// doesn't work
 
-            getNotificationManager().createNotificationChannel(notificationChannel);
+            notificationManager.createNotificationChannel(notificationChannel);
             notificationBuilder.setChannelId(channelId);// コンストラクタで入れてるからいらないかも
         }
 
@@ -176,13 +181,24 @@ public class NotificationService extends Service {
         // PRIORITY_MINだとどこにも表示されなくなる
         notificationBuilder.setPriority(NotificationCompat.PRIORITY_MAX);
 
-        startForeground(R.string.app_name, notificationBuilder.build());
+        notificationManager.notify(R.string.app_name, notificationBuilder.build());
+
+//        Intent intentServiceStop = new Intent(this, NotificationService.class);
+//        stopService(intentServiceStop);
+//        Intent intent = new Intent(this, NotificationService.class);
+//        if (adapter.getItemCount() > 0 && adapter.getItem(0) != null) {
+//            intent.putExtra("item", adapter.getItem(0).getDetails());
+//        }
+//        startService(intent);
     }
 
-    private NotificationManager getNotificationManager() {
-        if (notificationManager == null) {
-            notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        }
-        return notificationManager;
+    @Override
+    public void onListFragmentInteraction(RecyclerView.Adapter adapter, ListItemData item) {
+
+    }
+
+    @Override
+    public void onListAdapterCreated(RecyclerView.Adapter adapter) {
+
     }
 }

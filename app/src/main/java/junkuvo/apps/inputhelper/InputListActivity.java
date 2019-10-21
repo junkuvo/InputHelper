@@ -85,7 +85,8 @@ public class InputListActivity extends AppCompatActivity implements InputListFra
         stopService(intentServiceStop);
         Intent intent = new Intent(this, NotificationService.class);
         if (adapter.getItemCount() > 0 && adapter.getItem(0) != null) {
-            intent.putExtra("item", adapter.getItem(0).getDetails());
+            intent.putExtra("detail", adapter.getItem(0).getDetails());
+            intent.putExtra("id", adapter.getItem(0).getId());
         }
         startService(intent);
     }
