@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 
@@ -22,6 +23,7 @@ import junkuvo.apps.inputhelper.FullActivity;
 import junkuvo.apps.inputhelper.InputListActivity;
 import junkuvo.apps.inputhelper.OverlayActivity;
 import junkuvo.apps.inputhelper.R;
+import junkuvo.apps.inputhelper.util.SharedPreferencesUtil;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 
@@ -51,6 +53,13 @@ public class NotificationService extends Service {
         if (intent != null && intent.hasExtra("detail")) {
             firstItemDetail = intent.getStringExtra("detail");
             firstItemId = intent.getLongExtra("id", 0L);
+
+            SharedPreferencesUtil.saveString(this, "firstItemDetail", "firstItemDetail", firstItemDetail);
+        }else {
+            String prefDetail = SharedPreferencesUtil.getString(this, "firstItemDetail", "firstItemDetail");
+            if (prefDetail != null) {
+                firstItemDetail = prefDetail;
+            }
         }
         startServiceForeground();
         return START_STICKY;
@@ -101,7 +110,6 @@ public class NotificationService extends Service {
             getNotificationManager().createNotificationChannel(notificationChannel);
             notificationBuilder.setChannelId(channelId);// コンストラクタで入れてるからいらないかも
         }
-
         Intent intent = new Intent(this, OverlayActivity.class);
         notificationBuilder.setContentIntent(PendingIntent.getActivity(this, REQUEST_CODE_NOTIFICATION, intent, FLAG_UPDATE_CURRENT));
 

@@ -2,16 +2,18 @@ package junkuvo.apps.inputhelper.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.annotation.Nullable;
 
 import static android.content.Context.MODE_PRIVATE;
 
 public class SharedPreferencesUtil {
 
-    public enum PrefKeys{
+    public enum PrefKeys {
         SHAKE("SHAKE"),
         NOTIFICATION_SHOW_IN_BAR("NOTIFICATION_SHOW_IN_BAR");
 
         private String key;
+
         PrefKeys(String key) {
             this.key = key;
         }
@@ -28,6 +30,7 @@ public class SharedPreferencesUtil {
         editor.apply();
     }
 
+    @Nullable
     public static String getString(Context context, String prefName, String key) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(prefName, MODE_PRIVATE);
         return sharedPreferences.getString(key, null);
